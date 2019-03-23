@@ -4,8 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.mrgregorix.variant.api.proxy.BeforeInvocationResult;
@@ -44,7 +44,7 @@ public class AsmProxyProvider implements ProxyProvider
 
     @SuppressWarnings({"unchecked", "Duplicates"})
     @Override
-    public <T> Class<? extends T> createProxy(final ClassLoader classLoader, final Class<T> type, final String proxyClassname, final Map<Method, List<ProxyInvocationHandler>> invocationHandlers)
+    public <T> Class<? extends T> createProxy(final ClassLoader classLoader, final Class<T> type, final String proxyClassname, final Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers)
     {
         final AsmClassLoadingHelper loadingHelper = new AsmClassLoadingHelper(classLoader);
         final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -107,7 +107,7 @@ public class AsmProxyProvider implements ProxyProvider
         int localId = 0;
         final Map<Integer, Integer> localToGlobalMap = new HashMap<>();
 
-        for (final Map.Entry<Method, List<ProxyInvocationHandler>> methodListEntry : invocationHandlers.entrySet())
+        for (final Map.Entry<Method, Collection<ProxyInvocationHandler>> methodListEntry : invocationHandlers.entrySet())
         {
             int id = AsmProxyHelperInternal.getId();
 

@@ -1,7 +1,7 @@
 package net.mrgregorix.variant.api.proxy;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -27,5 +27,5 @@ public interface ProxyProvider
      *
      * @return newly created proxy type
      */
-    <T> Class<? extends T> createProxy(ClassLoader classLoader, Class<T> type, String proxyClassname, Map<Method, List<ProxyInvocationHandler>> invocationHandlers);
+    <T> Class<? extends T> createProxy(ClassLoader classLoader, Class<T> type, String proxyClassname, Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers);
 }

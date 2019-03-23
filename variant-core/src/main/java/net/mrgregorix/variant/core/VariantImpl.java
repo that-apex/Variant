@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 import com.google.common.base.Preconditions;
@@ -160,7 +161,7 @@ public class VariantImpl implements Variant
             return type;
         }
 
-        final Map<Method, List<ProxyInvocationHandler>> invocationHandlers = new HashMap<>();
+        final Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers = new HashMap<>();
 
         synchronized (this.proxySpecifications)
         {
@@ -176,7 +177,7 @@ public class VariantImpl implements Variant
                     continue;
                 }
 
-                List<ProxyInvocationHandler> handlerList = null;
+                Set<ProxyInvocationHandler> handlers = null;
 
                 for (final ProxySpecification proxySpecification : this.proxySpecifications)
                 {
@@ -187,17 +188,17 @@ public class VariantImpl implements Variant
                         continue;
                     }
 
-                    if (handlerList == null)
+                    if (handlers == null)
                     {
-                        handlerList = new ArrayList<>();
+                        handlers = new TreeSet<>(new PrioritizableComparator<>());
                     }
 
-                    handlerList.add(proxyMatchResult.getHandler());
+                    handlers.add(proxyMatchResult.getHandler());
                 }
 
-                if (handlerList != null)
+                if (handlers != null)
                 {
-                    invocationHandlers.put(method, handlerList);
+                    invocationHandlers.put(method, handlers);
                 }
             }
         }
