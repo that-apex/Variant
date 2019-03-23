@@ -8,7 +8,7 @@ import net.mrgregorix.variant.utils.priority.Prioritizable;
  * <p>
  * Used by {@link Variant#instantiate(Class)} to determine the best way to instantiate an object.
  */
-public interface InstantiationStrategy extends Prioritizable
+public interface InstantiationStrategy <I extends Prioritizable<I>> extends Prioritizable<I>
 {
     /**
      * Called to find a suitable constructor for injection.

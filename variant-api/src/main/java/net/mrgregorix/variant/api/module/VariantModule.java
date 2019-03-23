@@ -40,7 +40,7 @@ public interface VariantModule
      * @return a collection of all {@link InstantiationStrategy} that are being provided by this module.
      */
     @CollectionMayBeImmutable
-    default Collection<InstantiationStrategy> getInstantiationStrategies()
+    default Collection<InstantiationStrategy<?>> getInstantiationStrategies()
     {
         return Collections.emptyList();
     }

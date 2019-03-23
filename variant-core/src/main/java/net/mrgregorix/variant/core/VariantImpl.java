@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +36,6 @@ import net.mrgregorix.variant.core.builder.VariantBuilder;
 import net.mrgregorix.variant.utils.Pair;
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
 import net.mrgregorix.variant.utils.collections.immutable.SynchronizedWrapperCollectionWithImmutable;
-import net.mrgregorix.variant.utils.priority.PrioritizableComparator;
 import net.mrgregorix.variant.utils.reflect.MemberUtils;
 
 /**
@@ -51,7 +49,7 @@ public class VariantImpl implements Variant
     private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                 = new SynchronizedWrapperCollectionWithImmutable<>(
         new LinkedHashSet<>(), ImmutableList::copyOf);
     private final Collection<ProxySpecification>                                             proxySpecifications     = new ArrayList<>();
-    private final Collection<InstantiationStrategy>                                          instantiationStrategies = new TreeSet<>(new PrioritizableComparator<>());
+    private final Collection<InstantiationStrategy<?>>                                       instantiationStrategies = new TreeSet<>();
     private final ClassLoader                                                                classLoader;
     private final ProxyCache                                                                 proxyCache;
     private final ProxyProvider                                                              proxyProvider;
@@ -80,7 +78,7 @@ public class VariantImpl implements Variant
     @Override
     public <T> T instantiate(final Class<T> type)
     {
-        final InstantiationStrategy instantiationStrategy;
+        final InstantiationStrategy<?> instantiationStrategy;
         final InstantiationStrategyMatch<T> instantiationStrategyMatch;
 
         {
@@ -128,7 +126,7 @@ public class VariantImpl implements Variant
 
         synchronized (this.instantiationStrategies)
         {
-            for (final InstantiationStrategy instantiationStrategy : this.instantiationStrategies)
+            for (final InstantiationStrategy<?> instantiationStrategy : this.instantiationStrategies)
             {
                 final InstantiationStrategyMatch<T> match = instantiationStrategy.findMatch(type);
 
@@ -190,7 +188,7 @@ public class VariantImpl implements Variant
 
                     if (handlers == null)
                     {
-                        handlers = new TreeSet<>(new PrioritizableComparator<>());
+                        handlers = new TreeSet<>();
                     }
 
                     handlers.add(proxyMatchResult.getHandler());

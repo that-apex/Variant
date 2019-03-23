@@ -9,7 +9,7 @@ import net.mrgregorix.variant.utils.priority.Prioritizable;
  * <p>
  * This handler will be called every time when a proxied method is called (and no previous handler has already cancelled the call).
  */
-public interface ProxyInvocationHandler extends Prioritizable
+public interface ProxyInvocationHandler <T extends ProxyInvocationHandler<T>> extends Prioritizable<T>
 {
     /**
      * Called before an invocation of the super method.

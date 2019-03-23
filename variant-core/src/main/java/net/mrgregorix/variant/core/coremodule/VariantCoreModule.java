@@ -20,7 +20,7 @@ public class VariantCoreModule implements VariantModule
     }
 
     @Override
-    public Collection<InstantiationStrategy> getInstantiationStrategies()
+    public Collection<InstantiationStrategy<?>> getInstantiationStrategies()
     {
         return Collections.singletonList(new EmptyConstructorInstantiationStrategy());
     }
