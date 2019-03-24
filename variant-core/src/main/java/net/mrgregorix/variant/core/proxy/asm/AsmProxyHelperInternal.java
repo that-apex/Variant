@@ -21,7 +21,7 @@ public class AsmProxyHelperInternal
 
     public static BeforeInvocationResult beforeInvoke(final Object proxy, final Method method, final Object[] arguments, final ProxyInvocationHandler[] handlers)
     {
-        for (final ProxyInvocationHandler handler : handlers)
+        for (final ProxyInvocationHandler<?> handler : handlers)
         {
             try
             {
@@ -45,7 +45,7 @@ public class AsmProxyHelperInternal
     {
         Object actualReturn = returnValue;
 
-        for (final ProxyInvocationHandler handler : handlers)
+        for (final ProxyInvocationHandler<?> handler : handlers)
         {
             try
             {

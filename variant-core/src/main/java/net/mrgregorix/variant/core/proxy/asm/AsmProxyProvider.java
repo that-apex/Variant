@@ -44,7 +44,8 @@ public class AsmProxyProvider implements ProxyProvider
 
     @SuppressWarnings({"unchecked", "Duplicates"})
     @Override
-    public <T> Class<? extends T> createProxy(final ClassLoader classLoader, final Class<T> type, final String proxyClassname, final Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers)
+    public <T> Class<? extends T> createProxy(final ClassLoader classLoader, final Class<T> type, final String proxyClassname,
+                                              final Map<Method, Collection<ProxyInvocationHandler<?>>> invocationHandlers)
     {
         final AsmClassLoadingHelper loadingHelper = new AsmClassLoadingHelper(classLoader);
         final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -107,7 +108,7 @@ public class AsmProxyProvider implements ProxyProvider
         int localId = 0;
         final Map<Integer, Integer> localToGlobalMap = new HashMap<>();
 
-        for (final Map.Entry<Method, Collection<ProxyInvocationHandler>> methodListEntry : invocationHandlers.entrySet())
+        for (final Map.Entry<Method, Collection<ProxyInvocationHandler<?>>> methodListEntry : invocationHandlers.entrySet())
         {
             int id = AsmProxyHelperInternal.getId();
 

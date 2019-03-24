@@ -9,9 +9,9 @@ import net.mrgregorix.variant.utils.annotation.Nullable;
  */
 public class ProxyMatchResult
 {
-    private static final    ProxyMatchResult       NO_MATCH = new ProxyMatchResult(false, null);
-    private final           boolean                match;
-    private @Nullable final ProxyInvocationHandler handler;
+    private static final    ProxyMatchResult          NO_MATCH = new ProxyMatchResult(false, null);
+    private final           boolean                   match;
+    private @Nullable final ProxyInvocationHandler<?> handler;
 
     /**
      * Creates a new {@link ProxyMatchResult}
@@ -19,7 +19,7 @@ public class ProxyMatchResult
      * @param match   was there a match found
      * @param handler handler to be used to proxy the method
      */
-    protected ProxyMatchResult(final boolean match, @Nullable final ProxyInvocationHandler handler)
+    protected ProxyMatchResult(final boolean match, @Nullable final ProxyInvocationHandler<?> handler)
     {
         this.match = match;
         this.handler = handler;
@@ -43,7 +43,7 @@ public class ProxyMatchResult
      * @return the handler to be used to proxy this method.
      */
     @Nullable
-    public ProxyInvocationHandler getHandler()
+    public ProxyInvocationHandler<?> getHandler()
     {
         return this.handler;
     }
@@ -65,7 +65,7 @@ public class ProxyMatchResult
      *
      * @return a {@link ProxyMatchResult} with a match.
      */
-    public static ProxyMatchResult match(final ProxyInvocationHandler handler)
+    public static ProxyMatchResult match(final ProxyInvocationHandler<?> handler)
     {
         return new ProxyMatchResult(true, Objects.requireNonNull(handler, "handler"));
     }

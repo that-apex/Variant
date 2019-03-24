@@ -27,5 +27,5 @@ public interface ProxyProvider
      *
      * @return newly created proxy type
      */
-    <T> Class<? extends T> createProxy(ClassLoader classLoader, Class<T> type, String proxyClassname, Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers);
+    <T> Class<? extends T> createProxy(ClassLoader classLoader, Class<T> type, String proxyClassname, Map<Method, Collection<ProxyInvocationHandler<?>>> invocationHandlers);
 }

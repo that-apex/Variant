@@ -159,7 +159,7 @@ public class VariantImpl implements Variant
             return type;
         }
 
-        final Map<Method, Collection<ProxyInvocationHandler>> invocationHandlers = new HashMap<>();
+        final Map<Method, Collection<ProxyInvocationHandler<?>>> invocationHandlers = new HashMap<>();
 
         synchronized (this.proxySpecifications)
         {
@@ -175,7 +175,7 @@ public class VariantImpl implements Variant
                     continue;
                 }
 
-                Set<ProxyInvocationHandler> handlers = null;
+                Set<ProxyInvocationHandler<?>> handlers = null;
 
                 for (final ProxySpecification proxySpecification : this.proxySpecifications)
                 {
