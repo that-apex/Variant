@@ -2,12 +2,12 @@ package net.mrgregorix.variant.api.proxy;
 
 import java.lang.reflect.Method;
 
-import net.mrgregorix.variant.utils.priority.Prioritizable;
+import net.mrgregorix.variant.utils.priority.ModifiablePrioritizable;
 
 /**
  * <p>A definition of how a proxy should be created</p>
  */
-public interface ProxySpecification<T extends ProxySpecification<T>> extends Prioritizable<T>
+public interface ProxySpecification<T extends ProxySpecification<T>> extends ModifiablePrioritizable<T>
 {
     /**
      * <p>Checks if the provided <code>method</code> should be proxied by the proxy.</p>

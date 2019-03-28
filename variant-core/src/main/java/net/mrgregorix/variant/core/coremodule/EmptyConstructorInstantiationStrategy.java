@@ -11,6 +11,8 @@ import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatchType;
  */
 public class EmptyConstructorInstantiationStrategy implements InstantiationStrategy<EmptyConstructorInstantiationStrategy>
 {
+    private int priority = Integer.MIN_VALUE;
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> InstantiationStrategyMatch<T> findMatch(final Class<T> type)
@@ -35,6 +37,12 @@ public class EmptyConstructorInstantiationStrategy implements InstantiationStrat
     @Override
     public int getPriority()
     {
-        return Integer.MIN_VALUE;
+        return this.priority;
+    }
+
+    @Override
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
     }
 }

@@ -2,14 +2,14 @@ package net.mrgregorix.variant.api.proxy;
 
 import java.lang.reflect.Method;
 
-import net.mrgregorix.variant.utils.priority.Prioritizable;
+import net.mrgregorix.variant.utils.priority.ModifiablePrioritizable;
 
 /**
  * A handler to handle the before and after invocations of the proxied methods.
  * <p>
  * This handler will be called every time when a proxied method is called (and no previous handler has already cancelled the call).
  */
-public interface ProxyInvocationHandler <T extends ProxyInvocationHandler<T>> extends Prioritizable<T>
+public interface ProxyInvocationHandler <T extends ProxyInvocationHandler<T>> extends ModifiablePrioritizable<T>
 {
     /**
      * Called before an invocation of the super method.

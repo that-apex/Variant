@@ -1,6 +1,7 @@
 package net.mrgregorix.variant.api.instantiation;
 
 import net.mrgregorix.variant.api.Variant;
+import net.mrgregorix.variant.utils.priority.ModifiablePrioritizable;
 import net.mrgregorix.variant.utils.priority.Prioritizable;
 
 /**
@@ -8,7 +9,7 @@ import net.mrgregorix.variant.utils.priority.Prioritizable;
  * <p>
  * Used by {@link Variant#instantiate(Class)} to determine the best way to instantiate an object.
  */
-public interface InstantiationStrategy <I extends Prioritizable<I>> extends Prioritizable<I>
+public interface InstantiationStrategy <I extends InstantiationStrategy<I>> extends ModifiablePrioritizable<I>
 {
     /**
      * Called to find a suitable constructor for injection.
