@@ -48,7 +48,7 @@ public class VariantImpl implements Variant
 {
     private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                 = new SynchronizedWrapperCollectionWithImmutable<>(
         new LinkedHashSet<>(), ImmutableList::copyOf);
-    private final Collection<ProxySpecification>                                             proxySpecifications     = new ArrayList<>();
+    private final Collection<ProxySpecification<?>>                                          proxySpecifications     = new ArrayList<>();
     private final Collection<InstantiationStrategy<?>>                                       instantiationStrategies = new TreeSet<>();
     private final ClassLoader                                                                classLoader;
     private final ProxyCache                                                                 proxyCache;
@@ -177,7 +177,7 @@ public class VariantImpl implements Variant
 
                 Set<ProxyInvocationHandler<?>> handlers = null;
 
-                for (final ProxySpecification proxySpecification : this.proxySpecifications)
+                for (final ProxySpecification<?> proxySpecification : this.proxySpecifications)
                 {
                     final ProxyMatchResult proxyMatchResult = proxySpecification.shouldProxy(method);
 

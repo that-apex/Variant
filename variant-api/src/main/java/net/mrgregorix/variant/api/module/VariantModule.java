@@ -46,7 +46,7 @@ public interface VariantModule
     }
 
     @CollectionMayBeImmutable
-    default Collection<ProxySpecification> getProxySpecifications()
+    default Collection<ProxySpecification<?>> getProxySpecifications()
     {
         return Collections.emptyList();
     }
