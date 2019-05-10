@@ -23,6 +23,8 @@ public interface DirectedGraph <T>
      * @param vertexToPoint vertex that edge points to
      *
      * @return a newly created edge if the operation succeeded or null if such edge already existed
+     *
+     * @throws IllegalArgumentException when {@code vertex} is equal to {@code vertexToPoint}
      */
     @Nullable
     Edge<T> addEdge(T vertex, T vertexToPoint);
@@ -35,6 +37,8 @@ public interface DirectedGraph <T>
      * @param edge a edge to be added
      *
      * @return true if the edge was added to the graph, false if such edge already existed
+     *
+     * @throws IllegalArgumentException when {@link Edge#getPointingVertex()} ()} is equal to {@link Edge#getPointedVertex()}
      */
     boolean addEdge(Edge<T> edge);
 
@@ -47,7 +51,7 @@ public interface DirectedGraph <T>
      *
      * @return how much edges were successfully added
      */
-    long addEdges(Collection<Edge<T>> edges);
+    int addEdges(Collection<? extends Edge<T>> edges);
 
     /**
      * Removes an edge from the graph. If this edge was the only edge pointing to/from a vertex, that vertex will be removed from the graph so the graph does not contain any orphaned vertices.
@@ -67,7 +71,7 @@ public interface DirectedGraph <T>
      *
      * @see #removeEdge(Edge)
      */
-    long removeEdges(Collection<Edge<T>> edges);
+    int removeEdges(Collection<Edge<T>> edges);
 
     /**
      * Removes a vertex from the graph and all edges that was pointing to that vertex or from that vertex.
@@ -85,7 +89,7 @@ public interface DirectedGraph <T>
      *
      * @see #removeVertex(Object)
      */
-    long removeVertices(Collection<T> vertices);
+    int removeVertices(Collection<T> vertices);
 
     /**
      * @return a collection containing all graph's edges

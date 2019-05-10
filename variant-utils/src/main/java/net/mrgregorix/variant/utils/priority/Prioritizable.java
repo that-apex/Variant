@@ -4,6 +4,8 @@ import net.mrgregorix.variant.utils.annotation.NotNull;
 
 /**
  * Represents an object that has a priority
+ *
+ * @param <T> type of the class extending this {@link Prioritizable}
  */
 public interface Prioritizable <T extends Prioritizable<T>> extends Comparable<Prioritizable<? extends T>>
 {

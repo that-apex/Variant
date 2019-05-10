@@ -3,7 +3,7 @@ package net.mrgregorix.variant.utils.priority;
 /**
  * A {@link Prioritizable} which priority can be adjusted programatically.
  *
- * @param <T>
+ * @param <T> type of the class extending this {@link ModifiablePrioritizable}
  */
 public interface ModifiablePrioritizable <T extends ModifiablePrioritizable<T>> extends Prioritizable<T>
 {

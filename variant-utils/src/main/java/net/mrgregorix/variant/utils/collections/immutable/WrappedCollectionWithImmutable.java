@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.mrgregorix.variant.utils.annotation.Nullable;
 
 /**
@@ -53,5 +54,18 @@ public class WrappedCollectionWithImmutable <E, C extends ImmutableCollection<E>
     public static <E> WrappedCollectionWithImmutable<E, ImmutableList<E>> withImmutableList(final Collection<E> collection)
     {
         return new WrappedCollectionWithImmutable<>(collection, ImmutableList::copyOf);
+    }
+
+    /**
+     * Creates a new {@link WrappedCollectionWithImmutable} using an {@link ImmutableSet} as the immutable collection
+     *
+     * @param <E>        type of collection's elements
+     * @param collection collection to be wrapper
+     *
+     * @return new {@link WrappedCollectionWithImmutable} instance
+     */
+    public static <E> WrappedCollectionWithImmutable<E, ImmutableSet<E>> withImmutableSet(final Collection<E> collection)
+    {
+        return new WrappedCollectionWithImmutable<>(collection, ImmutableSet::copyOf);
     }
 }

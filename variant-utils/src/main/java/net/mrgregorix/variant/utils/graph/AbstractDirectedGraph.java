@@ -1,6 +1,7 @@
 package net.mrgregorix.variant.utils.graph;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -79,9 +80,9 @@ public abstract class AbstractDirectedGraph <T> implements DirectedGraph<T>
      *
      * @return amount of successfully performed functions
      */
-    private <S> long doBatch(final Predicate<S> function, final Collection<S> collection, final Runnable end)
+    private <S> int doBatch(final Predicate<S> function, final Collection<S> collection, final Runnable end)
     {
-        final long successes = collection.stream().filter(function).count();
+        final int successes = (int) collection.stream().filter(function).count();
 
         if (successes > 0)
         {
@@ -94,36 +95,41 @@ public abstract class AbstractDirectedGraph <T> implements DirectedGraph<T>
     @Override
     public boolean addEdge(final Edge<T> edge)
     {
-        return this.doOnce(this::addEdge, edge, this::addMissingVertices);
+        if (Objects.equals(edge.getPointingVertex(), edge.getPointedVertex()))
+        {
+            throw new IllegalArgumentException("vertex cannot point to itself");
+        }
+
+        return this.doOnce(this::addEdgeOnly, edge, this::addMissingVertices);
     }
 
     @Override
-    public long addEdges(final Collection<Edge<T>> edges)
+    public int addEdges(final Collection<? extends Edge<T>> edges)
     {
-        return this.doBatch(this::addEdge, edges, this::addMissingVertices);
+        return this.doBatch(this::addEdgeOnly, edges, this::addMissingVertices);
     }
 
     @Override
     public boolean removeEdge(final Edge<T> edge)
     {
-        return this.doOnce(this::removeEdge, edge, this::deleteOrphanedEdgesAndVertices);
+        return this.doOnce(this::removeEdgeOnly, edge, this::deleteOrphanedEdgesAndVertices);
     }
 
     @Override
-    public long removeEdges(final Collection<Edge<T>> edges)
+    public int removeEdges(final Collection<Edge<T>> edges)
     {
-        return this.doBatch(this::removeEdge, edges, this::deleteOrphanedEdgesAndVertices);
+        return this.doBatch(this::removeEdgeOnly, edges, this::deleteOrphanedEdgesAndVertices);
     }
 
     @Override
     public boolean removeVertex(final T vertex)
     {
-        return this.doOnce(this::removeVertex, vertex, this::deleteOrphanedEdgesAndVertices);
+        return this.doOnce(this::removeVertexOnly, vertex, this::deleteOrphanedEdgesAndVertices);
     }
 
     @Override
-    public long removeVertices(final Collection<T> vertices)
+    public int removeVertices(final Collection<T> vertices)
     {
-        return this.doBatch(this::removeVertex, vertices, this::deleteOrphanedEdgesAndVertices);
+        return this.doBatch(this::removeVertexOnly, vertices, this::deleteOrphanedEdgesAndVertices);
     }
 }
