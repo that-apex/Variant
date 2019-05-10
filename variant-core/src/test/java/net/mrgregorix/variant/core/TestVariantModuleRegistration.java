@@ -6,8 +6,12 @@ import net.mrgregorix.variant.api.module.ModuleHasNoImplementationException;
 import net.mrgregorix.variant.api.module.ModuleImplementation;
 import net.mrgregorix.variant.api.module.VariantModule;
 import net.mrgregorix.variant.core.builder.VariantBuilder;
+import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class TestVariantModuleRegistration
 {
@@ -26,14 +30,12 @@ public class TestVariantModuleRegistration
         final Variant variant = this.newVariant();
         final SimpleModule simpleModule = new SimpleModule();
 
-        Assertions.assertEquals(0, variant.getRegisteredModules().size(), "There are modules in the default Variant instance");
-
-        Assertions.assertSame(variant.registerModule(simpleModule), simpleModule, "Returned value was invalid for registerModule");
-        Assertions.assertEquals(1, variant.getRegisteredModules().size(), "A simple module was not registered successfully");
-        Assertions.assertTrue(variant.getRegisteredModules().contains(simpleModule), "The registered module is not the same that is held by the Variant instance");
-
-        Assertions.assertSame(variant.registerModule(simpleModule), simpleModule, "Returned value was invalid for registerModule");
-        Assertions.assertEquals(1, variant.getRegisteredModules().size(), "The simple module was doubled");
+        assertThat("There are modules in the default Variant instance", variant.getRegisteredModules(), hasSize(0));
+        assertThat("Returned value was invalid for registerModule", variant.registerModule(simpleModule), sameInstance(simpleModule));
+        assertThat("A simple module was not registered successfully", variant.getRegisteredModules(), hasSize(1));
+        assertThat("The registered module is not the same that is held by the Variant instance", variant.getRegisteredModules(), contains(simpleModule));
+        assertThat("Returned value was invalid for registerModule", variant.registerModule(simpleModule), sameInstance(simpleModule));
+        assertThat("The simple module was doubled", variant.getRegisteredModules(), hasSize(1));
     }
 
     @ModuleImplementation("net.mrgregorix.variant.core.TestVariantModuleRegistration$AdvancedModuleImpl")
@@ -49,14 +51,32 @@ public class TestVariantModuleRegistration
     }
 
     @Test
-    public void testAdvancedModuleRegistration() throws ClassNotFoundException
+    public void testAdvancedModuleRegistration()
     {
         final Variant variant = this.newVariant();
-        Assertions.assertEquals(0, variant.getRegisteredModules().size(), "There are modules in the default Variant instance");
+        assertThat("There are modules in the default Variant instance", variant.getRegisteredModules(), hasSize(0));
 
         final AdvancedModule advancedModule = variant.registerModule(AdvancedModule.class);
-        Assertions.assertEquals(1, variant.getRegisteredModules().size(), "An advanced module was not registered successfully");
-        Assertions.assertTrue(variant.getRegisteredModules().contains(advancedModule), "An advanced module was not registered successfully");
+        assertThat("An advanced module was not registered successfully", variant.getRegisteredModules(), hasSize(1));
+        assertThat("An advanced module was not registered successfully", variant.getRegisteredModules(), contains(advancedModule));
+    }
+
+    @Test
+    public void testGetModule()
+    {
+        final Variant variant = this.newVariant();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> variant.getModule(SimpleModule.class), "No exception thrown when querying for an invalid module");
+
+        final SimpleModule simpleModule = variant.registerModule(new SimpleModule());
+        assertThat("no SimpleModule was found even though it was registered", variant.getModule(SimpleModule.class), sameInstance(simpleModule));
+        assertThat("no SimpleModule was found even though it was registered", variant.getModule(DummyModule.class), sameInstance(simpleModule));
+
+        final AdvancedModule advancedModule = variant.registerModule(AdvancedModule.class);
+        assertThat("no SimpleModule was found even though it was registered", variant.getModule(SimpleModule.class), sameInstance(simpleModule));
+        assertThat("no AdvancedModule was found even though it was registered", variant.getModule(AdvancedModule.class), sameInstance(advancedModule));
+
+        Assertions.assertThrows(AmbiguousException.class, () -> variant.getModule(DummyModule.class), "No exception thrown when querying for an ambiguous module");
     }
 
     @ModuleImplementation("hello.i.dont.exist")
@@ -75,9 +95,10 @@ public class TestVariantModuleRegistration
     public void testInvalidModules()
     {
         final Variant variant = this.newVariant();
-        Assertions.assertEquals(variant.getRegisteredModules().size(), 0, "There are modules in the default Variant instance");
+        assertThat("There are modules in the default Variant instance", variant.getRegisteredModules(), hasSize(0));
 
-        Assertions.assertThrows(ClassNotFoundException.class, () -> variant.registerModule(InvalidModule.class), "ClassNotFoundException should be thrown for an invalid module implementation");
+        Assertions.assertThrows(
+            ModuleHasNoImplementationException.class, () -> variant.registerModule(InvalidModule.class), "ClassNotFoundException should be thrown for an invalid module implementation");
 
         Assertions.assertThrows(
             ModuleHasNoImplementationException.class, () -> variant.registerModule(InaccessibleModule.class),
@@ -101,10 +122,10 @@ public class TestVariantModuleRegistration
     }
 
     @Test
-    public void testInstanceHoldingModules() throws ClassNotFoundException
+    public void testInstanceHoldingModules()
     {
         final Variant variant = this.newVariant();
         final InstanceHoldingModule module = variant.registerModule(InstanceHoldingModule.class);
-        Assertions.assertSame(variant, module.getVariant(), "invalid Variant instance was send to the module");
+        assertThat("invalid Variant instance was send to the module", module.getVariant(), sameInstance(variant));
     }
 }

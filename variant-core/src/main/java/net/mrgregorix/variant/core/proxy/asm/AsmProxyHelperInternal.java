@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mrgregorix.variant.api.proxy.BeforeInvocationResult;
-import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.api.proxy.ProxyInvocationHandler;
 
 /**
@@ -19,13 +18,18 @@ public class AsmProxyHelperInternal
     private static final Map<Integer, Method>                   METHODS             = new HashMap<>();
     private static final Map<Integer, ProxyInvocationHandler[]> INVOCATION_HANDLERS = new HashMap<>();
 
-    public static BeforeInvocationResult beforeInvoke(final Object proxy, final Method method, final Object[] arguments, final ProxyInvocationHandler[] handlers)
+    public static BeforeInvocationResult beforeInvoke(final InternalProxy proxy, final Method method, final Object[] arguments, final ProxyInvocationHandler[] handlers)
     {
+        if (proxy.getProxyOmitFlag())
+        {
+            return BeforeInvocationResult.proceed();
+        }
+
         for (final ProxyInvocationHandler<?> handler : handlers)
         {
             try
             {
-                final BeforeInvocationResult beforeInvocationResult = handler.beforeInvocation((Proxy) proxy, method, arguments);
+                final BeforeInvocationResult beforeInvocationResult = handler.beforeInvocation(proxy, method, arguments);
 
                 if (! beforeInvocationResult.shouldProceed())
                 {
@@ -41,15 +45,21 @@ public class AsmProxyHelperInternal
         return BeforeInvocationResult.proceed();
     }
 
-    public static Object afterInvoke(final Object returnValue, final Object proxy, final Method method, final Object[] arguments, final ProxyInvocationHandler[] handlers)
+    public static Object afterInvoke(final Object returnValue, final InternalProxy proxy, final Method method, final Object[] arguments, final ProxyInvocationHandler[] handlers)
     {
+        if (proxy.getProxyOmitFlag())
+        {
+            proxy.setProxyOmitFlag(false);
+            return returnValue;
+        }
+
         Object actualReturn = returnValue;
 
         for (final ProxyInvocationHandler<?> handler : handlers)
         {
             try
             {
-                actualReturn = handler.afterInvocation((Proxy) proxy, method, arguments, actualReturn);
+                actualReturn = handler.afterInvocation(proxy, method, arguments, actualReturn);
             }
             catch (final Throwable throwable)
             {
@@ -90,7 +100,7 @@ public class AsmProxyHelperInternal
      * Dirty ooga booga
      */
     @SuppressWarnings("unchecked")
-    private static <T extends Throwable> void sneakyThrow(final Throwable t) throws T
+    public static <T extends Throwable> void sneakyThrow(final Throwable t) throws T
     {
         throw (T) t;
     }

@@ -24,8 +24,8 @@ public class DirectedGraphTest
 
         final Edge<String> edge1 = directedGraph.addEdge(dependant1, dependency);
         final Edge<String> edge2 = directedGraph.addEdge(dependant2, dependency);
-        assertThat("edges were not addded", directedGraph.getEdges(), hasSize(2));
-        assertThat("edges were not addded", directedGraph.getEdges(), contains(edge1, edge2));
+        assertThat("edges were not added", directedGraph.getEdges(), hasSize(2));
+        assertThat("edges were not added", directedGraph.getEdges(), contains(edge1, edge2));
 
         assertThat("not all vertices are listed", directedGraph.getVertices(), containsInAnyOrder(dependant1, dependant2, dependency));
         assertThat("vertices count is invalid", directedGraph.getVertices(), hasSize(3));

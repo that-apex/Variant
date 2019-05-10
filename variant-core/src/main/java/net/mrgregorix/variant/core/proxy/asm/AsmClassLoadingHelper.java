@@ -18,7 +18,7 @@ class AsmClassLoadingHelper extends ClassLoader
     /**
      * @see ClassLoader#defineClass(String, byte[], int, int)
      */
-    public Class<?> defineClass(String name, byte[] b)
+    public Class<?> defineClass(final String name, final byte[] b)
     {
         return this.defineClass(name, b, 0, b.length);
     }

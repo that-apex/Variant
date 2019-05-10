@@ -3,7 +3,7 @@ package net.mrgregorix.variant.inject.api.injector;
 /**
  * Exception thrown when a {@link CustomInjector} marked as singleton registerer is being registered but previously an injector with the same type was registered.
  */
-public class SingletonInjectorAlreadyRegisteredException extends Exception
+public class SingletonInjectorAlreadyRegisteredException extends RuntimeException
 {
     private final Class<?> type;
 

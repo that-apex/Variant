@@ -3,6 +3,7 @@ package net.mrgregorix.variant.core.coremodule;
 import java.util.Collection;
 import java.util.Collections;
 
+import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategy;
 import net.mrgregorix.variant.api.module.VariantModule;
 
@@ -20,7 +21,12 @@ public class VariantCoreModule implements VariantModule
     }
 
     @Override
-    public Collection<InstantiationStrategy<?>> getInstantiationStrategies()
+    public void initialize(Variant variant)
+    {
+    }
+
+    @Override
+    public Collection<InstantiationStrategy> getInstantiationStrategies()
     {
         return Collections.singletonList(new EmptyConstructorInstantiationStrategy());
     }

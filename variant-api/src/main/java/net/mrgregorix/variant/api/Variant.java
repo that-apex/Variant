@@ -9,6 +9,7 @@ import net.mrgregorix.variant.api.module.VariantModule;
 import net.mrgregorix.variant.api.proxy.ProxyCache;
 import net.mrgregorix.variant.api.proxy.ProxyProvider;
 import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
+import net.mrgregorix.variant.utils.exception.AmbiguousException;
 
 /**
  * <p>Core class for Variant framework</p>
@@ -47,6 +48,19 @@ public interface Variant
     Collection<VariantModule> getRegisteredModules();
 
     /**
+     * Gets a registered variant module that matches.
+     *
+     * @param module type of the module to find
+     * @param <T>    type of the module to find
+     *
+     * @return the found module
+     *
+     * @throws AmbiguousException       when there are more than one modules matching given criteria
+     * @throws IllegalArgumentException when there is no module matching the given criteria
+     */
+    <T extends VariantModule> T getModule(final Class<T> module);
+
+    /**
      * Registers a new module that will be used for all future instantiations.
      * <p>
      * Registering a module does not affect any object instances previously created by this {@link Variant} instance.
@@ -75,14 +89,13 @@ public interface Variant
      *
      * @return a newly created instance of {@code moduleClass} or a subclass specified by {@link ModuleImplementation}.
      *
-     * @throws ModuleHasNoImplementationException if the provided class is not instantiable or no {@link ModuleImplementation} annotation is present.
-     * @throws ClassNotFoundException             if the provided {@link ModuleImplementation} class is invalid.
+     * @throws ModuleHasNoImplementationException if the provided class is not instantiable or no {@link ModuleImplementation} annotation is present or the provided class is invalid.
      */
     <T extends VariantModule> T registerModule(final Class<T> moduleClass)
-        throws ModuleHasNoImplementationException, ClassNotFoundException;
+        throws ModuleHasNoImplementationException;
 
     /**
-     * <p>Returns a {@link ProxyCache} that is used by this Variant instance</p>
+     * Returns a {@link ProxyCache} that is used by this Variant instance
      *
      * @return used {@link ProxyCache}
      *
@@ -91,7 +104,7 @@ public interface Variant
     ProxyCache getProxyCache();
 
     /**
-     * <p>Returns a {@link ProxyProvider} that is used by this Variant instance</p>
+     * Returns a {@link ProxyProvider} that is used by this Variant instance
      *
      * @return used {@link ProxyProvider}
      *

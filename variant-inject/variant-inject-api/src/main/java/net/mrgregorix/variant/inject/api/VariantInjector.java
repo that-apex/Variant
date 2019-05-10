@@ -1,22 +1,26 @@
 package net.mrgregorix.variant.inject.api;
 
 import java.util.Collection;
+import javax.annotation.concurrent.ThreadSafe;
 
+import net.mrgregorix.variant.api.instantiation.AfterInstantiationHandler;
+import net.mrgregorix.variant.api.instantiation.InstantiationStrategy;
 import net.mrgregorix.variant.api.module.ModuleImplementation;
 import net.mrgregorix.variant.api.module.VariantModule;
 import net.mrgregorix.variant.inject.api.annotation.info.InjectableSingleton;
 import net.mrgregorix.variant.inject.api.injector.CustomInjector;
+import net.mrgregorix.variant.inject.api.injector.InjectionValueProvider;
 import net.mrgregorix.variant.inject.api.injector.SingletonInjectorAlreadyRegisteredException;
 import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
-import net.mrgregorix.variant.utils.annotation.Nullable;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 
 /**
  * The core of the Variant Injection system.
  */
+@ThreadSafe
 @InjectableSingleton
 @ModuleImplementation("net.mrgregorix.variant.inject.core.VariantInjectorImpl")
-public interface VariantInjector extends VariantModule
+public interface VariantInjector extends VariantModule, InjectionValueProvider
 {
     /**
      * @return an immutable list of {@link CustomInjector} used by this injector.
@@ -35,6 +39,15 @@ public interface VariantInjector extends VariantModule
     void registerCustomInjector(CustomInjector injector) throws IllegalArgumentException, SingletonInjectorAlreadyRegisteredException;
 
     /**
+     * Unregisters the given custom injector.
+     *
+     * @param injector injector to unregister
+     *
+     * @return true if the injector was removed, false if it was not even registered
+     */
+    boolean unregisterCustomInjector(CustomInjector injector);
+
+    /**
      * Searches for a custom singleton injector
      *
      * @param type type of a injector to get
@@ -42,8 +55,22 @@ public interface VariantInjector extends VariantModule
      *
      * @return an optional that may contain an injector or an empty optional if none found
      *
-     * @throws AmbiguousException when there are multiple injectors found for the given type
+     * @throws AmbiguousException       when there are multiple injectors found for the given type
+     * @throws IllegalArgumentException when there are no injectors matching the given type
      */
-    @Nullable
     <T extends CustomInjector> T getSingletonInjector(Class<T> type) throws AmbiguousException;
+
+    /**
+     * Returns an {@link InstantiationStrategy} used for finding @Inject constructors. This can be used to change the priority for the strategy
+     *
+     * @return an instantiation strategy for @Inject constructors
+     */
+    InstantiationStrategy getConstructorInstantiationStrategy();
+
+    /**
+     * Returns an {@link AfterInstantiationHandler} used for finding @Inject fields and initializing them. This can be used to change the priority for the handler.
+     *
+     * @return an after instantiation handler used for @Inject fields
+     */
+    AfterInstantiationHandler getFieldInjectionAfterInstantiationHandler();
 }

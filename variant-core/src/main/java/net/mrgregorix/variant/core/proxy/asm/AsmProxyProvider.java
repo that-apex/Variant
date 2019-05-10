@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mrgregorix.variant.api.proxy.BeforeInvocationResult;
-import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.api.proxy.ProxyInvocationHandler;
 import net.mrgregorix.variant.api.proxy.ProxyProvider;
 import org.objectweb.asm.ClassWriter;
@@ -30,11 +29,11 @@ public class AsmProxyProvider implements ProxyProvider
     {
         try
         {
-            ASM_PROXY_HELPER_BEFORE_INVOKE =
-                Type.getMethodDescriptor(AsmProxyHelperInternal.class.getDeclaredMethod("beforeInvoke", Object.class, Method.class, Object[].class, ProxyInvocationHandler[].class));
+            ASM_PROXY_HELPER_BEFORE_INVOKE = Type.getMethodDescriptor(
+                AsmProxyHelperInternal.class.getDeclaredMethod("beforeInvoke", InternalProxy.class, Method.class, Object[].class, ProxyInvocationHandler[].class));
 
-            ASM_PROXY_HELPER_AFTER_INVOKE =
-                Type.getMethodDescriptor(AsmProxyHelperInternal.class.getDeclaredMethod("afterInvoke", Object.class, Object.class, Method.class, Object[].class, ProxyInvocationHandler[].class));
+            ASM_PROXY_HELPER_AFTER_INVOKE = Type.getMethodDescriptor(
+                AsmProxyHelperInternal.class.getDeclaredMethod("afterInvoke", Object.class, InternalProxy.class, Method.class, Object[].class, ProxyInvocationHandler[].class));
         }
         catch (final Exception e)
         {
@@ -56,7 +55,7 @@ public class AsmProxyProvider implements ProxyProvider
             AsmGenerationUtils.javaNameToAsmName(proxyClassname), // name
             null, // signature, null = no generics
             AsmGenerationUtils.javaNameToAsmName(type.getName()), // superclass
-            new String[] {AsmGenerationUtils.javaNameToAsmName(Proxy.class.getName())} // interfaces
+            new String[] {AsmGenerationUtils.javaNameToAsmName(InternalProxy.class.getName())} // interfaces
         );
 
         //
@@ -258,8 +257,8 @@ public class AsmProxyProvider implements ProxyProvider
             mv.visitLocalVariable("$_VariantParameters", Type.getDescriptor(Object[].class), null, codeStart, codeEnd, localParametersArray);
             mv.visitEnd();
 
-            cw.visitField(Opcodes.ACC_PRIVATE, "$_VariantReflectMethod_" + localId, Type.getDescriptor(Method.class), null, null);
-            cw.visitField(Opcodes.ACC_PRIVATE, "$_VariantHandlerArray_" + localId, Type.getDescriptor(ProxyInvocationHandler[].class), null, null);
+            cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "$_VariantReflectMethod_" + localId, Type.getDescriptor(Method.class), null, null);
+            cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "$_VariantHandlerArray_" + localId, Type.getDescriptor(ProxyInvocationHandler[].class), null, null);
 
 
             final ProxyInvocationHandler[] array = new ProxyInvocationHandler[methodListEntry.getValue().size()];
@@ -273,56 +272,94 @@ public class AsmProxyProvider implements ProxyProvider
         //
         // Generate init methods
         //
-        cw.visitField(Opcodes.ACC_PRIVATE, "$_VariantInitialized", "Z", null, false);
+        cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "$_VariantInitialized", "Z", null, false);
 
-        final MethodVisitor mv = cw.visitMethod(
-            Opcodes.ACC_PRIVATE,
-            "$_VariantInit",
-            "()V",
-            null,
-            new String[0]
-        );
-
-        mv.visitCode();
-        final Label initialize = new Label();
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitFieldInsn(Opcodes.GETFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantInitialized", "Z");
-        mv.visitInsn(Opcodes.ICONST_0);
-        mv.visitJumpInsn(Opcodes.IF_ICMPEQ, initialize);
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitLabel(initialize);
-
-        for (final Map.Entry<Integer, Integer> entry : localToGlobalMap.entrySet())
         {
-            mv.visitVarInsn(Opcodes.ALOAD, 0);
-            AsmGenerationUtils.pushIntOntoStack(mv, entry.getValue());
-            mv.visitMethodInsn(
-                Opcodes.INVOKESTATIC,
-                AsmGenerationUtils.javaNameToAsmName(AsmProxyHelperInternal.class.getName()),
-                "getMethod",
-                Type.getMethodDescriptor(Type.getType(Method.class), Type.getType(int.class)),
-                false
+            final MethodVisitor mv = cw.visitMethod(
+                Opcodes.ACC_PRIVATE,
+                "$_VariantInit",
+                "()V",
+                null,
+                new String[0]
             );
-            mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantReflectMethod_" + entry.getKey(), Type.getDescriptor(Method.class));
 
+            mv.visitCode();
+            final Label initialize = new Label();
             mv.visitVarInsn(Opcodes.ALOAD, 0);
-            AsmGenerationUtils.pushIntOntoStack(mv, entry.getValue());
+            mv.visitFieldInsn(Opcodes.GETFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantInitialized", "Z");
+            mv.visitInsn(Opcodes.ICONST_0);
+            mv.visitJumpInsn(Opcodes.IF_ICMPEQ, initialize);
+            mv.visitInsn(Opcodes.RETURN);
+            mv.visitLabel(initialize);
+
+            for (final Map.Entry<Integer, Integer> entry : localToGlobalMap.entrySet())
+            {
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                AsmGenerationUtils.pushIntOntoStack(mv, entry.getValue());
+                mv.visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
+                    AsmGenerationUtils.javaNameToAsmName(AsmProxyHelperInternal.class.getName()),
+                    "getMethod",
+                    Type.getMethodDescriptor(Type.getType(Method.class), Type.getType(int.class)),
+                    false
+                );
+                mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantReflectMethod_" + entry.getKey(), Type.getDescriptor(Method.class));
+
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                AsmGenerationUtils.pushIntOntoStack(mv, entry.getValue());
+                mv.visitMethodInsn(
+                    Opcodes.INVOKESTATIC,
+                    AsmGenerationUtils.javaNameToAsmName(AsmProxyHelperInternal.class.getName()),
+                    "getInvocationHandlers",
+                    Type.getMethodDescriptor(Type.getType(ProxyInvocationHandler[].class), Type.getType(int.class)),
+                    false
+                );
+                mv.visitFieldInsn(
+                    Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantHandlerArray_" + entry.getKey(), Type.getDescriptor(ProxyInvocationHandler[].class));
+            }
+
+            // set $_VariantAdditionalProxyData
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitTypeInsn(Opcodes.NEW, AsmGenerationUtils.javaNameToAsmName(HashMap.class.getName()));
+            mv.visitInsn(Opcodes.DUP);
             mv.visitMethodInsn(
-                Opcodes.INVOKESTATIC,
-                AsmGenerationUtils.javaNameToAsmName(AsmProxyHelperInternal.class.getName()),
-                "getInvocationHandlers",
-                Type.getMethodDescriptor(Type.getType(ProxyInvocationHandler[].class), Type.getType(int.class)),
+                Opcodes.INVOKESPECIAL,
+                AsmGenerationUtils.javaNameToAsmName(HashMap.class.getName()), // owner
+                "<init>",
+                "()V",
                 false
             );
-            mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantHandlerArray_" + entry.getKey(), Type.getDescriptor(ProxyInvocationHandler[].class));
+
+            mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantAdditionalProxyData", Type.getDescriptor(Map.class));
+
+            // set $_VariantInitialized to true
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitInsn(Opcodes.ICONST_1);
+            mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantInitialized", "Z");
+            mv.visitInsn(Opcodes.RETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
         }
 
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitInsn(Opcodes.ICONST_1);
-        mv.visitFieldInsn(Opcodes.PUTFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantInitialized", "Z");
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(0, 0);
-        mv.visitEnd();
+        // Generate $_VariantAdditionalProxyData field getAdditionalProxyData
+        cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "$_VariantAdditionalProxyData", Type.getDescriptor(Map.class), null, false);
+
+        {
+            final MethodVisitor mv = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "getAdditionalProxyData",
+                Type.getMethodDescriptor(Type.getType(Map.class)),
+                null,
+                new String[0]
+            );
+
+            mv.visitCode();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitFieldInsn(Opcodes.GETFIELD, AsmGenerationUtils.javaNameToAsmName(proxyClassname), "$_VariantAdditionalProxyData", Type.getDescriptor(Map.class));
+            mv.visitInsn(Opcodes.ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
 
         //
         // Finalize

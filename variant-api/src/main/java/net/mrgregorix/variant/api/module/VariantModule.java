@@ -3,6 +3,8 @@ package net.mrgregorix.variant.api.module;
 import java.util.Collection;
 import java.util.Collections;
 
+import net.mrgregorix.variant.api.Variant;
+import net.mrgregorix.variant.api.instantiation.AfterInstantiationHandler;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategy;
 import net.mrgregorix.variant.api.proxy.ProxySpecification;
 import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
@@ -33,6 +35,13 @@ public interface VariantModule
     String getName();
 
     /**
+     * Called after a module is being registered into a {@link Variant instance}.
+     *
+     * @param variant {@link Variant} that this module is being registered to
+     */
+    void initialize(Variant variant);
+
+    /**
      * Returns a collection of all {@link InstantiationStrategy} that are being provided by this module.
      * <p>
      * This will be queried only once, during the module registration. It should be an immutable collection.
@@ -40,13 +49,33 @@ public interface VariantModule
      * @return a collection of all {@link InstantiationStrategy} that are being provided by this module.
      */
     @CollectionMayBeImmutable
-    default Collection<InstantiationStrategy<?>> getInstantiationStrategies()
+    default Collection<InstantiationStrategy> getInstantiationStrategies()
     {
         return Collections.emptyList();
     }
 
+    /**
+     * Returns a collection of all {@link ProxySpecification} that are being provided by this module.
+     * <p>
+     * This will be queried only once, during the module registration. It should be an immutable collection.
+     *
+     * @return a collection of all {@link ProxySpecification} that are being provided by this module.
+     */
     @CollectionMayBeImmutable
-    default Collection<ProxySpecification<?>> getProxySpecifications()
+    default Collection<ProxySpecification> getProxySpecifications()
+    {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns a collection of all {@link AfterInstantiationHandler} that are being provided by this module.
+     * <p>
+     * This will be queried only once, during the module registration. It should be an immutable collection.
+     *
+     * @return a collection of all {@link AfterInstantiationHandler} that are being provided by this module.
+     */
+    @CollectionMayBeImmutable
+    default Collection<AfterInstantiationHandler> getAfterInstantiationHandlers()
     {
         return Collections.emptyList();
     }

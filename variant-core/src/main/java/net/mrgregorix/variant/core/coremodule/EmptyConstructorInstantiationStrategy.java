@@ -9,7 +9,7 @@ import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatchType;
 /**
  * An instantiation strategy that provides instantiation for empty constructors.
  */
-public class EmptyConstructorInstantiationStrategy implements InstantiationStrategy<EmptyConstructorInstantiationStrategy>
+public class EmptyConstructorInstantiationStrategy implements InstantiationStrategy
 {
     private int priority = Integer.MIN_VALUE;
 

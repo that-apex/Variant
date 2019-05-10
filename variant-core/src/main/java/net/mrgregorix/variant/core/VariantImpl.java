@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -12,6 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
@@ -19,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.api.VariantInstantiationException;
 import net.mrgregorix.variant.api.annotations.NoProxy;
+import net.mrgregorix.variant.api.instantiation.AfterInstantiationHandler;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategy;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatch;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatchType;
@@ -36,6 +38,7 @@ import net.mrgregorix.variant.core.builder.VariantBuilder;
 import net.mrgregorix.variant.utils.Pair;
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
 import net.mrgregorix.variant.utils.collections.immutable.SynchronizedWrapperCollectionWithImmutable;
+import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import net.mrgregorix.variant.utils.reflect.MemberUtils;
 
 /**
@@ -44,12 +47,15 @@ import net.mrgregorix.variant.utils.reflect.MemberUtils;
  * <p>
  * To create your own instance use {@link VariantBuilder}
  */
+@ThreadSafe
 public class VariantImpl implements Variant
 {
-    private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                 = new SynchronizedWrapperCollectionWithImmutable<>(
+    private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                    = new SynchronizedWrapperCollectionWithImmutable<>(
         new LinkedHashSet<>(), ImmutableList::copyOf);
-    private final Collection<ProxySpecification<?>>                                          proxySpecifications     = new ArrayList<>();
-    private final Collection<InstantiationStrategy<?>>                                       instantiationStrategies = new TreeSet<>();
+    private final ReentrantReadWriteLock                                                     dataLock                   = new ReentrantReadWriteLock(true);
+    private final Collection<ProxySpecification>                                             proxySpecifications        = new TreeSet<>();
+    private final Collection<InstantiationStrategy>                                          instantiationStrategies    = new TreeSet<>();
+    private final Collection<AfterInstantiationHandler>                                      afterInstantiationHandlers = new TreeSet<>();
     private final ClassLoader                                                                classLoader;
     private final ProxyCache                                                                 proxyCache;
     private final ProxyProvider                                                              proxyProvider;
@@ -78,7 +84,7 @@ public class VariantImpl implements Variant
     @Override
     public <T> T instantiate(final Class<T> type)
     {
-        final InstantiationStrategy<?> instantiationStrategy;
+        final InstantiationStrategy instantiationStrategy;
         final InstantiationStrategyMatch<T> instantiationStrategyMatch;
 
         {
@@ -102,9 +108,10 @@ public class VariantImpl implements Variant
         }
         proxyConstructor.setAccessible(true);
 
+        final T newInstance;
         try
         {
-            return proxyConstructor.newInstance(instantiationStrategy.getInstantiationParameters(instantiationStrategyMatch));
+            newInstance = proxyConstructor.newInstance(instantiationStrategy.getInstantiationParameters(instantiationStrategyMatch));
         }
         catch (final InstantiationException e)
         {
@@ -118,15 +125,29 @@ public class VariantImpl implements Variant
         {
             throw new VariantInstantiationException("Exception while calling " + instantiationStrategyMatch.getConstructor(), e.getCause());
         }
+
+        try
+        {
+            this.dataLock.readLock().lock();
+            this.afterInstantiationHandlers.forEach(handler -> handler.afterInstantiationHandler((Proxy) newInstance));
+        }
+        finally
+        {
+            this.dataLock.readLock().unlock();
+        }
+
+        return newInstance;
     }
 
     private <T> Pair<InstantiationStrategy, InstantiationStrategyMatch<T>> findInstantiationStrategy(final Class<T> type)
     {
         Pair<InstantiationStrategy, InstantiationStrategyMatch<T>> validLaxMatch = null;
 
-        synchronized (this.instantiationStrategies)
+        try
         {
-            for (final InstantiationStrategy<?> instantiationStrategy : this.instantiationStrategies)
+            this.dataLock.readLock().lock();
+
+            for (final InstantiationStrategy instantiationStrategy : this.instantiationStrategies)
             {
                 final InstantiationStrategyMatch<T> match = instantiationStrategy.findMatch(type);
 
@@ -140,6 +161,10 @@ public class VariantImpl implements Variant
                     validLaxMatch = new Pair<>(instantiationStrategy, match);
                 }
             }
+        }
+        finally
+        {
+            this.dataLock.readLock().unlock();
         }
 
         if (validLaxMatch == null)
@@ -160,9 +185,10 @@ public class VariantImpl implements Variant
         }
 
         final Map<Method, Collection<ProxyInvocationHandler<?>>> invocationHandlers = new HashMap<>();
-
-        synchronized (this.proxySpecifications)
+        try
         {
+            this.dataLock.readLock().lock();
+
             for (final Method method : MemberUtils.getAllMethods(type))
             {
                 if (Modifier.isFinal(method.getModifiers()) || Modifier.isPrivate(method.getModifiers()))
@@ -177,7 +203,7 @@ public class VariantImpl implements Variant
 
                 Set<ProxyInvocationHandler<?>> handlers = null;
 
-                for (final ProxySpecification<?> proxySpecification : this.proxySpecifications)
+                for (final ProxySpecification proxySpecification : this.proxySpecifications)
                 {
                     final ProxyMatchResult proxyMatchResult = proxySpecification.shouldProxy(method);
 
@@ -199,6 +225,10 @@ public class VariantImpl implements Variant
                     invocationHandlers.put(method, handlers);
                 }
             }
+        }
+        finally
+        {
+            this.dataLock.readLock().unlock();
         }
 
         return this.proxyProvider.createProxy(
@@ -224,44 +254,88 @@ public class VariantImpl implements Variant
     @Override
     public Collection<VariantModule> getRegisteredModules()
     {
-        return this.modules.getImmutable();
+        this.dataLock.readLock().lock();
+
+        try
+        {
+            return this.modules.getImmutable();
+        }
+        finally
+        {
+            this.dataLock.readLock().unlock();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends VariantModule> T getModule(Class<T> module)
+    {
+        T match = null;
+
+        for (final VariantModule variantModule : this.modules)
+        {
+            if (! module.isInstance(variantModule))
+            {
+                continue;
+            }
+
+            if (match != null)
+            {
+                throw new AmbiguousException("Two or module modules matching " + module);
+            }
+
+            match = (T) variantModule;
+        }
+
+        if (match == null)
+        {
+            throw new IllegalArgumentException("No modules matching " + module);
+        }
+
+        return match;
     }
 
     @Override
     public <T extends VariantModule> T registerModule(final T module)
     {
-        synchronized (this.modules)
+        try
         {
+            this.dataLock.writeLock().lock();
             this.modules.add(module);
 
-            synchronized (this.proxySpecifications)
+            for (final VariantModule m : this.modules)
             {
-                this.proxySpecifications.clear();
-                this.modules
-                    .forEach(m -> this.proxySpecifications.addAll(m.getProxySpecifications()));
-            }
-
-            synchronized (this.instantiationStrategies)
-            {
-                this.instantiationStrategies.clear();
-                this.modules
-                    .forEach(m -> this.instantiationStrategies.addAll(m.getInstantiationStrategies()));
+                this.proxySpecifications.addAll(m.getProxySpecifications());
+                this.instantiationStrategies.addAll(m.getInstantiationStrategies());
+                this.afterInstantiationHandlers.addAll(m.getAfterInstantiationHandlers());
             }
         }
+        finally
+        {
+            this.dataLock.writeLock().unlock();
+        }
 
+        module.initialize(this);
         return module;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends VariantModule> T registerModule(final Class<T> moduleClass) throws ModuleHasNoImplementationException, ClassNotFoundException
+    public <T extends VariantModule> T registerModule(final Class<T> moduleClass) throws ModuleHasNoImplementationException
     {
         Class<? extends T> classToInstantiate = moduleClass;
 
         final ModuleImplementation moduleImplementation = moduleClass.getDeclaredAnnotation(ModuleImplementation.class);
         if (moduleImplementation != null)
         {
-            classToInstantiate = (Class<? extends T>) Class.forName(moduleImplementation.value());
+            try
+            {
+                classToInstantiate = (Class<? extends T>) Class.forName(moduleImplementation.value());
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new ModuleHasNoImplementationException(e);
+            }
         }
 
         Constructor<? extends T> constructor;
