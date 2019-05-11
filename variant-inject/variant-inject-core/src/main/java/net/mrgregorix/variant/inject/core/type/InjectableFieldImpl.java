@@ -1,4 +1,4 @@
-package net.mrgregorix.variant.inject.core.type.impl;
+package net.mrgregorix.variant.inject.core.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

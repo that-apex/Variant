@@ -33,14 +33,9 @@ public class SimpleSingletonCustomInjectorImpl extends AbstractModifiablePriorit
     @Override
     public Optional<Object> provideValueForInjection(final InjectableElement element)
     {
-        if (! element.isAnnotationPresent(Inject.class))
+        if (! SimpleSingletonCustomInjectorImpl.isSimplyInjectable(element))
         {
-            final Inject annotation = AnnotationUtils.getAnnotation(element, Inject.class);
-
-            if (annotation == null || ! annotation.simpleInjection())
-            {
-                return Optional.empty();
-            }
+            return Optional.empty();
         }
 
         Optional<Object> match = Optional.empty();
@@ -79,5 +74,16 @@ public class SimpleSingletonCustomInjectorImpl extends AbstractModifiablePriorit
     public Set<Object> getValues()
     {
         return this.values.getImmutable();
+    }
+
+    public static boolean isSimplyInjectable(final InjectableElement injectableElement)
+    {
+        if (injectableElement.isAnnotationPresent(Inject.class))
+        {
+            return true;
+        }
+
+        final Inject annotation = AnnotationUtils.getAnnotation(injectableElement, Inject.class);
+        return annotation != null && annotation.simpleInjection();
     }
 }

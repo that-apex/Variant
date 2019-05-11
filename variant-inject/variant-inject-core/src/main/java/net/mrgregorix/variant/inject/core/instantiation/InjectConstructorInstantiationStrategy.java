@@ -1,32 +1,31 @@
 package net.mrgregorix.variant.inject.core.instantiation;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategy;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatch;
 import net.mrgregorix.variant.api.instantiation.InstantiationStrategyMatchType;
+import net.mrgregorix.variant.inject.api.VariantInjector;
 import net.mrgregorix.variant.inject.api.annotation.Inject;
-import net.mrgregorix.variant.inject.api.injector.InjectionValueProvider;
 import net.mrgregorix.variant.inject.api.type.InjectableConstructorParameter;
-import net.mrgregorix.variant.inject.core.type.impl.InjectableConstructorParameterImpl;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
 
 public class InjectConstructorInstantiationStrategy extends AbstractModifiablePrioritizable<InstantiationStrategy> implements InstantiationStrategy
 {
-    private final InjectionValueProvider injectionValueProvider;
+    private final VariantInjector variantInjector;
 
     /**
      * Constructs a new InjectConstructorInstantiationStrategy
      *
-     * @param injectionValueProvider provider for injected values
+     * @param variantInjector provider for injected values
      */
-    public InjectConstructorInstantiationStrategy(InjectionValueProvider injectionValueProvider)
+    public InjectConstructorInstantiationStrategy(final VariantInjector variantInjector)
     {
-        this.injectionValueProvider = injectionValueProvider;
+        this.variantInjector = variantInjector;
     }
 
     @SuppressWarnings("unchecked")
@@ -56,20 +55,20 @@ public class InjectConstructorInstantiationStrategy extends AbstractModifiablePr
     @Override
     public Object[] getInstantiationParameters(final InstantiationStrategyMatch<?> match)
     {
-        final Parameter[] parameters = Objects.requireNonNull(match.getConstructor()).getParameters();
-        final Object[] values = new Object[parameters.length];
+        final Collection<InjectableConstructorParameter> parameters = this.variantInjector.getElements(Objects.requireNonNull(match.getConstructor()).getDeclaringClass(), InjectableConstructorParameter.class);
+        final Object[] values = new Object[parameters.size()];
+        int i = 0;
 
-        for (int i = 0; i < parameters.length; i++)
+        for (final InjectableConstructorParameter parameter : parameters)
         {
-            final InjectableConstructorParameter injectableConstructorParameter = new InjectableConstructorParameterImpl(parameters[i]);
-            final Optional<Object> value = this.injectionValueProvider.provideValueForInjection(injectableConstructorParameter);
+            final Optional<Object> value = this.variantInjector.provideValueForInjection(parameter);
 
             if (! value.isPresent())
             {
-                throw new IllegalArgumentException("no value to inject into " + injectableConstructorParameter.getHandle() + " was found");
+                throw new IllegalArgumentException("no value to inject into " + parameter.getHandle() + " was found");
             }
 
-            values[i] = value.get();
+            values[i++] = value.get();
         }
 
         return values;

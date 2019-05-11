@@ -22,10 +22,14 @@ import net.mrgregorix.variant.inject.api.VariantInjector;
 import net.mrgregorix.variant.inject.api.injector.CustomInjector;
 import net.mrgregorix.variant.inject.api.injector.SingletonInjectorAlreadyRegisteredException;
 import net.mrgregorix.variant.inject.api.type.InjectableElement;
+import net.mrgregorix.variant.inject.api.type.provider.InjectableElementProvider;
 import net.mrgregorix.variant.inject.core.injector.CoreValuesInjector;
 import net.mrgregorix.variant.inject.core.injector.SimpleSingletonCustomInjectorImpl;
+import net.mrgregorix.variant.inject.core.injector.VariantModuleInjector;
 import net.mrgregorix.variant.inject.core.instantiation.FieldInjectionAfterInstantiationHandler;
 import net.mrgregorix.variant.inject.core.instantiation.InjectConstructorInstantiationStrategy;
+import net.mrgregorix.variant.inject.core.type.provider.InjectableConstructorParameterProvider;
+import net.mrgregorix.variant.inject.core.type.provider.InjectableFieldProvider;
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
 import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
@@ -38,13 +42,15 @@ public class VariantInjectorImpl implements VariantInjector
 {
     public static final String MODULE_NAME = "Variant::Inject::Core";
 
-    private final CollectionWithImmutable<CustomInjector, ImmutableList<CustomInjector>> customInjectors                         = WrappedCollectionWithImmutable.withImmutableList(new TreeSet<>());
-    private final InjectConstructorInstantiationStrategy                                 constructorInstantiationStrategy        = new InjectConstructorInstantiationStrategy(this);
-    private final FieldInjectionAfterInstantiationHandler                                fieldInjectionAfterInstantiationHandler = new FieldInjectionAfterInstantiationHandler(this);
-    private final ReadWriteLock                                                          injectorLock                            = new ReentrantReadWriteLock();
-    private final Collection<Class<? extends CustomInjector>>                            singletonInjectors                      = new ArrayList<>();
-    private final Map<Class<? extends CustomInjector>, Optional<CustomInjector>>         injectorCache                           = new HashMap<>();
-    private       boolean                                                                injectorCacheDirty                      = true;
+    private final ReadWriteLock                                                                                      providerLock                            = new ReentrantReadWriteLock();
+    private final CollectionWithImmutable<InjectableElementProvider<?>, ImmutableList<InjectableElementProvider<?>>> providers                               = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
+    private final ReadWriteLock                                                                                      injectorLock                            = new ReentrantReadWriteLock();
+    private final CollectionWithImmutable<CustomInjector, ImmutableList<CustomInjector>>                             customInjectors                         = WrappedCollectionWithImmutable.withImmutableList(new TreeSet<>());
+    private final InjectConstructorInstantiationStrategy                                                             constructorInstantiationStrategy        = new InjectConstructorInstantiationStrategy(this);
+    private final FieldInjectionAfterInstantiationHandler                                                            fieldInjectionAfterInstantiationHandler = new FieldInjectionAfterInstantiationHandler(this);
+    private final Collection<Class<? extends CustomInjector>>                                                        singletonInjectors                      = new ArrayList<>();
+    private final Map<Class<? extends CustomInjector>, Optional<CustomInjector>>                                     injectorCache                           = new HashMap<>();
+    private       boolean                                                                                            injectorCacheDirty                      = true;
 
     @Override
     public String getName()
@@ -55,8 +61,79 @@ public class VariantInjectorImpl implements VariantInjector
     @Override
     public void initialize(final Variant variant)
     {
-        this.registerCustomInjector(new CoreValuesInjector(this, variant));
+        this.registerCustomInjector(new CoreValuesInjector(variant));
         this.registerCustomInjector(new SimpleSingletonCustomInjectorImpl());
+        this.registerCustomInjector(new VariantModuleInjector(variant));
+
+        this.registerInjectableElementProvider(new InjectableFieldProvider());
+        this.registerInjectableElementProvider(new InjectableConstructorParameterProvider(this.constructorInstantiationStrategy));
+    }
+
+    @Override
+    public Collection<InjectableElementProvider<?>> getInjectableElementProviders()
+    {
+        this.providerLock.readLock().lock();
+
+        try
+        {
+            return this.providers.getImmutable();
+        }
+        finally
+        {
+            this.providerLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public void registerInjectableElementProvider(final InjectableElementProvider<?> provider) throws IllegalArgumentException
+    {
+        this.providerLock.writeLock().lock();
+
+        try
+        {
+            if (! this.providers.add(provider))
+            {
+                throw new IllegalArgumentException("Already registered!");
+            }
+        }
+        finally
+        {
+            this.providerLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean unregisterCustomInjector(InjectableElementProvider<?> provider)
+    {
+        this.providerLock.writeLock().lock();
+
+        try
+        {
+            return this.providers.remove(provider);
+        }
+        finally
+        {
+            this.providerLock.writeLock().unlock();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E extends InjectableElement> Collection<E> getElements(final Class<?> clazz, final Class<E> type)
+    {
+        final Collection<E> output = new ArrayList<>();
+
+        for (final InjectableElementProvider<?> provider : this.getInjectableElementProviders())
+        {
+            if (! type.isAssignableFrom(provider.getType()))
+            {
+                continue;
+            }
+
+            output.addAll((Collection<? extends E>) provider.provide(clazz));
+        }
+
+        return output;
     }
 
     @Override

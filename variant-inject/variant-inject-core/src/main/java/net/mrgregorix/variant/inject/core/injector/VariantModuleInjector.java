@@ -3,15 +3,16 @@ package net.mrgregorix.variant.inject.core.injector;
 import java.util.Optional;
 
 import net.mrgregorix.variant.api.Variant;
+import net.mrgregorix.variant.api.module.VariantModule;
 import net.mrgregorix.variant.inject.api.injector.CustomInjector;
 import net.mrgregorix.variant.inject.api.type.InjectableElement;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
 
-public class CoreValuesInjector extends AbstractModifiablePrioritizable<CustomInjector> implements CustomInjector
+public class VariantModuleInjector extends AbstractModifiablePrioritizable<CustomInjector> implements CustomInjector
 {
     private final Variant variant;
 
-    public CoreValuesInjector(final Variant variant)
+    public VariantModuleInjector(Variant variant)
     {
         this.variant = variant;
         this.setPriority(Integer.MAX_VALUE);
@@ -23,14 +24,15 @@ public class CoreValuesInjector extends AbstractModifiablePrioritizable<CustomIn
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<Object> provideValueForInjection(final InjectableElement element)
     {
-        if (Variant.class.isAssignableFrom(element.getType()))
+        if (! VariantModule.class.isAssignableFrom(element.getType()))
         {
-            return Optional.of(this.variant);
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        return Optional.of(this.variant.getModule((Class<? extends VariantModule>) element.getType()));
     }
 }

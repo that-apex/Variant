@@ -11,6 +11,8 @@ import net.mrgregorix.variant.inject.api.annotation.info.InjectableSingleton;
 import net.mrgregorix.variant.inject.api.injector.CustomInjector;
 import net.mrgregorix.variant.inject.api.injector.InjectionValueProvider;
 import net.mrgregorix.variant.inject.api.injector.SingletonInjectorAlreadyRegisteredException;
+import net.mrgregorix.variant.inject.api.type.InjectableElement;
+import net.mrgregorix.variant.inject.api.type.provider.InjectableElementProvider;
 import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 
@@ -23,6 +25,46 @@ import net.mrgregorix.variant.utils.exception.AmbiguousException;
 public interface VariantInjector extends VariantModule, InjectionValueProvider
 {
     /**
+     * Returns an immutable list of {@link InjectableElementProvider} used by this injector.
+     *
+     * @return an immutable list of {@link InjectableElementProvider} used by this injector.
+     */
+    @CollectionMayBeImmutable
+    Collection<InjectableElementProvider<?>> getInjectableElementProviders();
+
+    /**
+     * Registers a new injectable element provider for this injector.
+     *
+     * @param provider provider to be registered
+     *
+     * @throws IllegalArgumentException when the requested the requested element provider is already registered
+     */
+    void registerInjectableElementProvider(final InjectableElementProvider<?> provider) throws IllegalArgumentException;
+
+    /**
+     * Unregisters the given element provider.
+     *
+     * @param provider provider to unregister
+     *
+     * @return provider if the injector was removed, false if it was not even registered
+     */
+    boolean unregisterCustomInjector(InjectableElementProvider<?> provider);
+
+    /**
+     * Gets all {@link InjectableElement}  that extends the given type from the given class.
+     *
+     * @param clazz class to be scanned for elements
+     * @param type  type that {@link InjectableElement} must extend
+     * @param <E>   type that {@link InjectableElement} must extend
+     *
+     * @return collection of retrieved {@link InjectableElement}s
+     */
+    @CollectionMayBeImmutable
+    <E extends InjectableElement> Collection<E> getElements(Class<?> clazz, Class<E> type);
+
+    /**
+     * Returns an immutable list of {@link CustomInjector} used by this injector.
+     *
      * @return an immutable list of {@link CustomInjector} used by this injector.
      */
     @CollectionMayBeImmutable
