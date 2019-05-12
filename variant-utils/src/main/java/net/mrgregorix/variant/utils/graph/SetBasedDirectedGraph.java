@@ -4,7 +4,10 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import net.mrgregorix.variant.utils.annotation.Nullable;
+import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
+import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 
 /**
  * A {@link DirectedGraph} that stores edges in a simple set
@@ -13,8 +16,8 @@ import net.mrgregorix.variant.utils.annotation.Nullable;
  */
 public class SetBasedDirectedGraph <T> extends AbstractDirectedGraph<T>
 {
-    private final Set<Edge<T>> edges;
-    private final Set<T>       vertices;
+    private final CollectionWithImmutable<Edge<T>, ImmutableSet<Edge<T>>> edges;
+    private final CollectionWithImmutable<T, ImmutableSet<T>>             vertices;
 
     /**
      * Creates a new SetBasedDirectedGraph using a default list implementation
@@ -31,8 +34,8 @@ public class SetBasedDirectedGraph <T> extends AbstractDirectedGraph<T>
      */
     public SetBasedDirectedGraph(final Set<Edge<T>> edges)
     {
-        this.edges = Objects.requireNonNull(edges, "edges");
-        this.vertices = new LinkedHashSet<>();
+        this.edges = WrappedCollectionWithImmutable.withImmutableSet(Objects.requireNonNull(edges, "edges"));
+        this.vertices = WrappedCollectionWithImmutable.withImmutableSet(new LinkedHashSet<>());
         this.addMissingVertices();
     }
 
@@ -84,12 +87,12 @@ public class SetBasedDirectedGraph <T> extends AbstractDirectedGraph<T>
     @Override
     public Set<Edge<T>> getEdges()
     {
-        return this.edges;
+        return this.edges.getImmutable();
     }
 
     @Override
     public Set<T> getVertices()
     {
-        return this.vertices;
+        return this.vertices.getImmutable();
     }
 }

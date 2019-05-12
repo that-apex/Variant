@@ -95,11 +95,11 @@ public interface DirectedGraph <T>
      * @return a collection containing all graph's edges
      */
     @CollectionMayBeImmutable
-    Collection<? extends Edge<T>> getEdges();
+    Collection<Edge<T>> getEdges();
 
     /**
      * @return a collection containing all graph's vertices
      */
     @CollectionMayBeImmutable
-    Collection<? extends T> getVertices();
+    Collection<T> getVertices();
 }

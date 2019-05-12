@@ -73,6 +73,11 @@
             </dependency>
             <dependency>
                 <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-inject</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
                 <artifactId>variant-inject-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
