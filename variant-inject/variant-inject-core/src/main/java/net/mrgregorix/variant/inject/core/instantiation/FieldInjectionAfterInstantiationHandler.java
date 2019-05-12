@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.mrgregorix.variant.api.instantiation.AfterInstantiationHandler;
 import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.inject.api.VariantInjector;
+import net.mrgregorix.variant.inject.api.injector.InjectionException;
 import net.mrgregorix.variant.inject.api.type.InjectableField;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
 
@@ -26,7 +27,7 @@ public class FieldInjectionAfterInstantiationHandler extends AbstractModifiableP
 
             if (! value.isPresent())
             {
-                throw new IllegalArgumentException("no value to inject into " + field + " was found");
+                throw new InjectionException("no value to inject into " + field + " was found");
             }
 
             field.getHandle().setAccessible(true);
