@@ -12,6 +12,7 @@ import net.mrgregorix.variant.inject.api.VariantInjector;
 import net.mrgregorix.variant.inject.api.annotation.Inject;
 import net.mrgregorix.variant.inject.api.injector.InjectionException;
 import net.mrgregorix.variant.inject.api.type.InjectableConstructorParameter;
+import net.mrgregorix.variant.utils.annotation.AnnotationUtils;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
 
@@ -37,7 +38,7 @@ public class InjectConstructorInstantiationStrategy extends AbstractModifiablePr
 
         for (final Constructor<?> declaredConstructor : type.getDeclaredConstructors())
         {
-            if (declaredConstructor.getDeclaredAnnotation(Inject.class) == null)
+            if (AnnotationUtils.getAnnotation(declaredConstructor, Inject.class) == null)
             {
                 continue;
             }
