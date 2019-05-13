@@ -29,8 +29,7 @@ public interface Variant
      * Any method called from a Variant-managed class can be intercepted by any of the registered Variant modules</p>
      *
      * <p>This method never returns an instance with the exact type as
-     * specified by <code>type</code> parameter, rather it returns an object that is an instance of a proxy class generated in runtime that extends the given type. Therefore then given type CAN NOT be
-     * a final class nor have final methods.</p>
+     * specified by <code>type</code> parameter, rather it returns an object that is an instance of a proxy class generated in runtime that extends the given type. Therefore then given type CAN NOT be a final class nor have final methods.</p>
      *
      * @param type type of the class to be instantiated
      * @param <T>  type of the class to be instantiated
@@ -79,8 +78,7 @@ public interface Variant
      * <p>
      * Registering a module does not affect any object instances previously created by this {@link Variant} instance.
      * <p>
-     * The {@code moduleClass} must be an instantiatable class or an interface/abstract class with {@link ModuleImplementation} annotation. If such annotation is present, it will be used even if the
-     * {@code moduleClass} itself is instantiable.
+     * The {@code moduleClass} must be an instantiatable class or an interface/abstract class with {@link ModuleImplementation} annotation. If such annotation is present, it will be used even if the {@code moduleClass} itself is instantiable.
      * <p>
      * The module's class must have an empty constructor OR a constructor that takes only one parameter of type {@link Variant} which will be supplied by this Variant instance.
      *

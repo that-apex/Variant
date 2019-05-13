@@ -21,12 +21,12 @@ public @interface Inject
     /**
      * Defines whether the annotated annotation will work as a simple injection annotation.
      * <p>
-     * This means that an annotated injectable element is available for simple injection. Simple injection is an injection that will simply inject a known, singleton value (i.e. a Service or a common
-     * global or environmental instance) by the {@link SimpleSingletonCustomInjector}. This is used when sorting to find the best instantiation order. If X requires Y to be simply-injected and Y is
-     * not yet found, X instantiation will be postponed until Y is instantiated. This will only work if X and Y are instantiated in one request.
+     * This means that an annotated injectable element is available for simple injection. Simple injection is an injection that will simply inject a known, singleton value (i.e. a Service or a common global or environmental instance) by the {@link
+     * SimpleSingletonCustomInjector}. This is used when sorting to find the best instantiation order. If X requires Y to be simply-injected and Y is not yet found, X instantiation will be postponed until Y is instantiated. This will only work if X
+     * and Y are instantiated in one request.
      * <p>
-     * This property has effect only when @Inject annotation is used on another annotation. It does nothing if its on field or on a constructor. All fields and constructors with an @Inject annotation
-     * stated explicitly are treated as simple injections and there is no way to change that.
+     * This property has effect only when @Inject annotation is used on another annotation. It does nothing if its on field or on a constructor. All fields and constructors with an @Inject annotation stated explicitly are treated as simple injections
+     * and there is no way to change that.
      *
      * @return whether the annotated annotation will work as a simple injection annotation.
      */

@@ -11,8 +11,7 @@ public enum InstantiationStrategyMatchType
     NONE,
 
     /**
-     * The {@link InstantiationStrategy} is able to instantiate the provided object, but it does not strictly met the strategy's requirements and another strategy should be used for this instantiation
-     * if possible.
+     * The {@link InstantiationStrategy} is able to instantiate the provided object, but it does not strictly met the strategy's requirements and another strategy should be used for this instantiation if possible.
      */
     LAX,
 

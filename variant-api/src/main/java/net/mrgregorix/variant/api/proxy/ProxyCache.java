@@ -48,8 +48,7 @@ public interface ProxyCache
      * an entry witch such base type does not yet exists in this cache</p>
      *
      * @param baseType  base type
-     * @param proxyType supplier for the proxy type, it will be called only if there is no entry with the same base class as provided. The function's argument is the same as <code>baseType</code>.
-     *                  This cannot return null.
+     * @param proxyType supplier for the proxy type, it will be called only if there is no entry with the same base class as provided. The function's argument is the same as <code>baseType</code>. This cannot return null.
      * @param <T>       type of the base class
      *
      * @return the current (existing or computed) proxy for the base type

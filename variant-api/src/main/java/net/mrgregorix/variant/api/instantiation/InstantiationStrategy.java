@@ -15,8 +15,8 @@ public interface InstantiationStrategy extends ModifiablePrioritizable<Instantia
      * <p>
      * If no valid constructor is found the {@link InstantiationStrategyMatch#getMatchType()} will be set to {@link InstantiationStrategyMatchType#NONE} and the constructor will be set to null
      * <p>
-     * If there are multiple suitable constructors the ones marked {@link InstantiationStrategyMatchType#CERTAIN} will be prioritized above the ones marked with {@link
-     * InstantiationStrategyMatchType#LAX}. If there are multiple CERTAIN type constructors it is up to the strategy to select one or return a {@link InstantiationStrategyMatchType#NONE} match.
+     * If there are multiple suitable constructors the ones marked {@link InstantiationStrategyMatchType#CERTAIN} will be prioritized above the ones marked with {@link InstantiationStrategyMatchType#LAX}. If there are multiple CERTAIN type
+     * constructors it is up to the strategy to select one or return a {@link InstantiationStrategyMatchType#NONE} match.
      *
      * @param type type that is to be constructed
      *

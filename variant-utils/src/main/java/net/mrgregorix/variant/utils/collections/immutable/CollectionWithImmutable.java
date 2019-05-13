@@ -26,8 +26,7 @@ import com.google.common.collect.ImmutableCollection;
 public interface CollectionWithImmutable <E, C extends ImmutableCollection<E>> extends Collection<E>
 {
     /**
-     * Returns an immutable collection that is an immutable copy of the wrapped collection. This method may return the same ImmutableCollection instance if no changes were made to the wrapped
-     * collection since the previous function call.
+     * Returns an immutable collection that is an immutable copy of the wrapped collection. This method may return the same ImmutableCollection instance if no changes were made to the wrapped collection since the previous function call.
      *
      * @return an immutable collection
      */
