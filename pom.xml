@@ -14,6 +14,7 @@
         <module>variant-core</module>
         <module>variant-utils</module>
         <module>variant-inject</module>
+        <module>variant-scanner</module>
     </modules>
 
     <name>Variant - Parent</name>
@@ -86,6 +87,21 @@
                 <artifactId>variant-inject-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-scanner</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-scanner-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-scanner-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>javax.annotation</groupId>
@@ -106,6 +122,11 @@
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm-util</artifactId>
                 <version>7.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.11</version>
             </dependency>
 
             <dependency>
