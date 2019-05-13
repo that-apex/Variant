@@ -3,6 +3,7 @@ package net.mrgregorix.variant.inject.core.full.simple;
 import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.core.builder.VariantBuilder;
 import net.mrgregorix.variant.inject.api.VariantInjector;
+import net.mrgregorix.variant.inject.api.injector.InjectionException;
 import net.mrgregorix.variant.inject.api.injector.SimpleSingletonCustomInjector;
 import net.mrgregorix.variant.inject.core.VariantInjectorImpl;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
@@ -21,8 +22,8 @@ public class SimpleInjectionTest
             .withModules(new VariantInjectorImpl())
             .build();
 
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-            variant.instantiate(TestedClass.class), "no IllegalArgumentException is thrown even though there are no suitable values for injections");
+        Assertions.assertThrows(InjectionException.class, () ->
+            variant.instantiate(TestedClass.class), "no InjectionException is thrown even though there are no suitable values for injections");
 
         final String data = "hello, this is test";
         final SimpleSingletonCustomInjector singletonInjector = variant.getModule(VariantInjector.class).getSingletonInjector(SimpleSingletonCustomInjector.class);
