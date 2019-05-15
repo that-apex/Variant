@@ -7,24 +7,25 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.mrgregorix.variant.utils.annotation.Nullable;
 
 /**
  * A thread-safe implementation of {@link CollectionWithImmutable} that uses an existing collection.
  */
 @ThreadSafe
-public class SynchronizedWrapperCollectionWithImmutable <E, C extends ImmutableCollection<E>> extends AbstractWrappedCollectionWithImmutable<E, C>
+public class SynchronizedWrappedCollectionWithImmutable <E, C extends ImmutableCollection<E>> extends AbstractWrappedCollectionWithImmutable<E, C>
 {
     protected final   Function<Collection<E>, C> creator;
     private @Nullable C                          immutableCollection;
 
     /**
-     * Construct a new SynchronizedWrapperCollectionWithImmutable
+     * Construct a new SynchronizedWrappedCollectionWithImmutable
      *
      * @param wrappedCollection a collection that should be wrapped by this collection. The wrapped collection should never be modified directly.
      * @param creator           a function that will create an ImmutableCollection from an existing Collection
      */
-    public SynchronizedWrapperCollectionWithImmutable(final Collection<E> wrappedCollection, final Function<Collection<E>, C> creator)
+    public SynchronizedWrappedCollectionWithImmutable(final Collection<E> wrappedCollection, final Function<Collection<E>, C> creator)
     {
         super(wrappedCollection);
         this.creator = Objects.requireNonNull(creator, "creator");
@@ -72,15 +73,28 @@ public class SynchronizedWrapperCollectionWithImmutable <E, C extends ImmutableC
     }
 
     /**
-     * Creates a new {@link SynchronizedWrapperCollectionWithImmutable} using an {@link ImmutableList} as the immutable collection
+     * Creates a new {@link SynchronizedWrappedCollectionWithImmutable} using an {@link ImmutableList} as the immutable collection
      *
      * @param <E>        type of collection's elements
      * @param collection collection to be wrapper
      *
-     * @return new {@link SynchronizedWrapperCollectionWithImmutable} instance
+     * @return new {@link SynchronizedWrappedCollectionWithImmutable} instance
      */
-    public static <E> SynchronizedWrapperCollectionWithImmutable<E, ImmutableList<E>> withImmutableList(final Collection<E> collection)
+    public static <E> SynchronizedWrappedCollectionWithImmutable<E, ImmutableList<E>> withImmutableList(final Collection<E> collection)
     {
-        return new SynchronizedWrapperCollectionWithImmutable<>(collection, ImmutableList::copyOf);
+        return new SynchronizedWrappedCollectionWithImmutable<>(collection, ImmutableList::copyOf);
+    }
+
+    /**
+     * Creates a new {@link SynchronizedWrappedCollectionWithImmutable} using an {@link ImmutableSet} as the immutable collection
+     *
+     * @param <E>        type of collection's elements
+     * @param collection collection to be wrapper
+     *
+     * @return new {@link SynchronizedWrappedCollectionWithImmutable} instance
+     */
+    public static <E> SynchronizedWrappedCollectionWithImmutable<E, ImmutableSet<E>> withImmutableSet(final Collection<E> collection)
+    {
+        return new SynchronizedWrappedCollectionWithImmutable<>(collection, ImmutableSet::copyOf);
     }
 }

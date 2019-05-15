@@ -37,7 +37,7 @@ import net.mrgregorix.variant.api.proxy.ProxySpecification;
 import net.mrgregorix.variant.core.builder.VariantBuilder;
 import net.mrgregorix.variant.utils.Pair;
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
-import net.mrgregorix.variant.utils.collections.immutable.SynchronizedWrapperCollectionWithImmutable;
+import net.mrgregorix.variant.utils.collections.immutable.SynchronizedWrappedCollectionWithImmutable;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import net.mrgregorix.variant.utils.reflect.MemberUtils;
 
@@ -50,8 +50,7 @@ import net.mrgregorix.variant.utils.reflect.MemberUtils;
 @ThreadSafe
 public class VariantImpl implements Variant
 {
-    private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                    = new SynchronizedWrapperCollectionWithImmutable<>(
-        new LinkedHashSet<>(), ImmutableList::copyOf);
+    private final CollectionWithImmutable<VariantModule, ImmutableCollection<VariantModule>> modules                    = new SynchronizedWrappedCollectionWithImmutable<>(new LinkedHashSet<>(), ImmutableList::copyOf);
     private final ReentrantReadWriteLock                                                     dataLock                   = new ReentrantReadWriteLock(true);
     private final Collection<ProxySpecification>                                             proxySpecifications        = new TreeSet<>();
     private final Collection<InstantiationStrategy>                                          instantiationStrategies    = new TreeSet<>();
