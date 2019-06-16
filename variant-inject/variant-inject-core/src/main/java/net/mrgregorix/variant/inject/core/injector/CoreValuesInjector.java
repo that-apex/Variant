@@ -6,6 +6,7 @@ import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.inject.api.injector.CustomInjector;
 import net.mrgregorix.variant.inject.api.type.InjectableElement;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
+import net.mrgregorix.variant.utils.priority.PriorityConstants;
 
 public class CoreValuesInjector extends AbstractModifiablePrioritizable<CustomInjector> implements CustomInjector
 {
@@ -14,7 +15,7 @@ public class CoreValuesInjector extends AbstractModifiablePrioritizable<CustomIn
     public CoreValuesInjector(final Variant variant)
     {
         this.variant = variant;
-        this.setPriority(Integer.MAX_VALUE);
+        this.setPriority(PriorityConstants.HIGHEST);
     }
 
     @Override

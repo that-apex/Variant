@@ -14,6 +14,7 @@ import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutabl
 import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 import net.mrgregorix.variant.utils.exception.AmbiguousException;
 import net.mrgregorix.variant.utils.priority.AbstractModifiablePrioritizable;
+import net.mrgregorix.variant.utils.priority.PriorityConstants;
 
 public class SimpleSingletonCustomInjectorImpl extends AbstractModifiablePrioritizable<CustomInjector> implements SimpleSingletonCustomInjector
 {
@@ -21,7 +22,7 @@ public class SimpleSingletonCustomInjectorImpl extends AbstractModifiablePriorit
 
     public SimpleSingletonCustomInjectorImpl()
     {
-        this.setPriority(Integer.MIN_VALUE);
+        this.setPriority(PriorityConstants.HIGHEST);
     }
 
     @Override
