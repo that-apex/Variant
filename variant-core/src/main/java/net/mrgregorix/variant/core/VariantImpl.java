@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Preconditions;
@@ -83,46 +84,61 @@ public class VariantImpl implements Variant
     @Override
     public <T> T instantiate(final Class<T> type)
     {
-        final InstantiationStrategy instantiationStrategy;
-        final InstantiationStrategyMatch<T> instantiationStrategyMatch;
-
-        {
-            final Pair<InstantiationStrategy, InstantiationStrategyMatch<T>> pair = this.findInstantiationStrategy(type);
-            instantiationStrategy = pair.getLeft();
-            instantiationStrategyMatch = pair.getRight();
-        }
-
         final Class<? extends T> proxyType = this.proxyCache.addIfAbsent(type, this::createProxy);
 
-        final Constructor<? extends T> proxyConstructor;
-        try
-        {
-            proxyConstructor = proxyType.getDeclaredConstructor(Objects.requireNonNull(instantiationStrategyMatch.getConstructor()).getParameterTypes());
-        }
-        catch (final NoSuchMethodException e)
-        {
-            throw new VariantInstantiationException(
-                "Invalid proxy was created by " + this.proxyProvider.getClass().getName() + ". Couldn't find constructor " + instantiationStrategyMatch.getConstructor() + "for the proxied type: " +
-                type.getName() + ", proxy: " + proxyType.getName());
-        }
-        proxyConstructor.setAccessible(true);
-
         final T newInstance;
-        try
+
+        if (type.isInterface())
         {
-            newInstance = proxyConstructor.newInstance(instantiationStrategy.getInstantiationParameters(instantiationStrategyMatch));
+            try
+            {
+                newInstance = proxyType.getDeclaredConstructor().newInstance();
+            }
+            catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e)
+            {
+                throw new AssertionError("This should never happen", e);
+            }
         }
-        catch (final InstantiationException e)
+        else
         {
-            throw new ModuleHasNoImplementationException("Class " + type.getName() + " is not instantiatable", e);
-        }
-        catch (final IllegalAccessException e)
-        {
-            throw new VariantInstantiationException("Constructor " + instantiationStrategyMatch.getConstructor() + " is invalid due to not being accessible", e);
-        }
-        catch (final InvocationTargetException e)
-        {
-            throw new VariantInstantiationException("Exception while calling " + instantiationStrategyMatch.getConstructor(), e.getCause());
+            final InstantiationStrategy instantiationStrategy;
+            final InstantiationStrategyMatch<T> instantiationStrategyMatch;
+
+            {
+                final Pair<InstantiationStrategy, InstantiationStrategyMatch<T>> pair = this.findInstantiationStrategy(type);
+                instantiationStrategy = pair.getLeft();
+                instantiationStrategyMatch = pair.getRight();
+            }
+
+            final Constructor<? extends T> proxyConstructor;
+            try
+            {
+                proxyConstructor = proxyType.getDeclaredConstructor(Objects.requireNonNull(instantiationStrategyMatch.getConstructor()).getParameterTypes());
+            }
+            catch (final NoSuchMethodException e)
+            {
+                throw new VariantInstantiationException(
+                    "Invalid proxy was created by " + this.proxyProvider.getClass().getName() + ". Couldn't find constructor " + instantiationStrategyMatch.getConstructor() + "for the proxied type: " +
+                    type.getName() + ", proxy: " + proxyType.getName());
+            }
+            proxyConstructor.setAccessible(true);
+
+            try
+            {
+                newInstance = proxyConstructor.newInstance(instantiationStrategy.getInstantiationParameters(instantiationStrategyMatch));
+            }
+            catch (final InstantiationException e)
+            {
+                throw new ModuleHasNoImplementationException("Class " + type.getName() + " is not instantiatable", e);
+            }
+            catch (final IllegalAccessException e)
+            {
+                throw new VariantInstantiationException("Constructor " + instantiationStrategyMatch.getConstructor() + " is invalid due to not being accessible", e);
+            }
+            catch (final InvocationTargetException e)
+            {
+                throw new VariantInstantiationException("Exception while calling " + instantiationStrategyMatch.getConstructor(), e.getCause());
+            }
         }
 
         try
@@ -188,18 +204,25 @@ public class VariantImpl implements Variant
         {
             this.dataLock.readLock().lock();
 
-            for (final Method method : MemberUtils.getAllMethods(type))
+            final Set<Method> actualMethods =
+                MemberUtils.getAllMethods(type)
+                           .stream()
+                           .filter(method -> method.getDeclaringClass() != Object.class)
+                           .filter(method -> !Modifier.isFinal(method.getModifiers()) && !Modifier.isPrivate(method.getModifiers()) && method.getDeclaredAnnotation(NoProxy.class) == null)
+                           .map(method -> {
+                               try
+                               {
+                                   return type.getMethod(method.getName(), method.getParameterTypes());
+                               }
+                               catch (final NoSuchMethodException e)
+                               {
+                                   return method;
+                               }
+                           })
+                           .collect(Collectors.toSet());
+
+            for (final Method method : actualMethods)
             {
-                if (Modifier.isFinal(method.getModifiers()) || Modifier.isPrivate(method.getModifiers()))
-                {
-                    continue;
-                }
-
-                if (method.getDeclaredAnnotation(NoProxy.class) != null)
-                {
-                    continue;
-                }
-
                 Set<ProxyInvocationHandler<?>> handlers = null;
 
                 for (final ProxySpecification proxySpecification : this.proxySpecifications)
@@ -236,6 +259,17 @@ public class VariantImpl implements Variant
             this.proxyNamingStrategy.nameProxyClass(this, type),
             invocationHandlers
         );
+    }
+
+    @Override
+    public Proxy asProxy(final Object object)
+    {
+        if (! (object instanceof Proxy))
+        {
+            throw new IllegalArgumentException("Not a proxy");
+        }
+
+        return (Proxy) object;
     }
 
     @Override

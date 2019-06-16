@@ -27,6 +27,14 @@ public interface Proxy
      */
     default Class<?> getProxyBaseClass()
     {
+        for (final Class<?> anInterface : this.getClass().getInterfaces())
+        {
+            if (!Proxy.class.isAssignableFrom(anInterface))
+            {
+                return anInterface;
+            }
+        }
+
         return this.getClass().getSuperclass();
     }
 

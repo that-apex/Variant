@@ -4,8 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.mrgregorix.variant.api.proxy.BeforeInvocationResult;
@@ -49,13 +51,23 @@ public class AsmProxyProvider implements ProxyProvider
         final AsmClassLoadingHelper loadingHelper = new AsmClassLoadingHelper(classLoader);
         final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
+        Class<?> superClass = type;
+        final List<String> interfaces = new ArrayList<>();
+        interfaces.add(AsmGenerationUtils.javaNameToAsmName(InternalProxy.class.getName()));
+
+        if (type.isInterface())
+        {
+            superClass = Object.class;
+            interfaces.add(AsmGenerationUtils.javaNameToAsmName(type.getName()));
+        }
+
         cw.visit(
             Opcodes.V1_8, // Java version
             Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER | Opcodes.ACC_SYNTHETIC, // access specifier
             AsmGenerationUtils.javaNameToAsmName(proxyClassname), // name
             null, // signature, null = no generics
-            AsmGenerationUtils.javaNameToAsmName(type.getName()), // superclass
-            new String[] {AsmGenerationUtils.javaNameToAsmName(InternalProxy.class.getName())} // interfaces
+            AsmGenerationUtils.javaNameToAsmName(superClass.getName()), // superclass
+            interfaces.toArray(new String[0])
         );
 
         //
@@ -104,6 +116,44 @@ public class AsmProxyProvider implements ProxyProvider
             mv.visitEnd();
         }
 
+        if (type.isInterface())
+        {
+            final MethodVisitor mv = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "<init>",
+                "()V",
+                null,
+                new String[0]
+            );
+
+            mv.visitCode();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+
+            mv.visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                AsmGenerationUtils.javaNameToAsmName(Object.class.getName()), // owner
+                "<init>",
+                "()V",
+                false
+            );
+
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                AsmGenerationUtils.javaNameToAsmName(proxyClassname), // owner
+                "$_VariantInit",
+                "()V",
+                false
+            );
+
+            mv.visitInsn(Opcodes.RETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+
+        //
+        // Generate methods
+        //
         int localId = 0;
         final Map<Integer, Integer> localToGlobalMap = new HashMap<>();
 

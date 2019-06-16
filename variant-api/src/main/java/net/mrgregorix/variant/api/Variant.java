@@ -6,6 +6,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import net.mrgregorix.variant.api.module.ModuleHasNoImplementationException;
 import net.mrgregorix.variant.api.module.ModuleImplementation;
 import net.mrgregorix.variant.api.module.VariantModule;
+import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.api.proxy.ProxyCache;
 import net.mrgregorix.variant.api.proxy.ProxyProvider;
 import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
@@ -37,6 +38,17 @@ public interface Variant
      * @return a newly instantiated object
      */
     <T> T instantiate(Class<T> type) throws VariantInstantiationException;
+
+    /**
+     * Returns the given object as a {@link Proxy} object if its a proxy. Otherwise throws an {@link IllegalArgumentException} exception
+     *
+     * @param object object to be checked
+     *
+     * @return the object instance
+     *
+     * @throws IllegalArgumentException if the given object is not a proxy
+     */
+    Proxy asProxy(Object object);
 
     /**
      * Returns a collection containing all the {@link VariantModule}s that were registered to this Variant instance.

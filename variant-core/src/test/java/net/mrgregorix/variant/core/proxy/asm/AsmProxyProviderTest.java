@@ -5,6 +5,7 @@ import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.core.ProxyEverythingModule;
 import net.mrgregorix.variant.core.builder.VariantBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,9 +13,15 @@ import static org.hamcrest.Matchers.*;
 
 public class AsmProxyProviderTest
 {
-    private final Variant variant = new VariantBuilder()
-        .withProxyProvider(new AsmProxyProvider())
-        .build();
+    private Variant variant;
+
+    @BeforeEach
+    public void init()
+    {
+        this.variant = new VariantBuilder()
+            .withProxyProvider(new AsmProxyProvider())
+            .build();
+    }
 
     @Test
     public void test()
@@ -45,6 +52,7 @@ public class AsmProxyProviderTest
         this.variant.registerModule(new ProxyEverythingModule(handler));
 
         final MarkingTestClass instance = this.variant.instantiate(MarkingTestClass.class);
+        assertThat("instance base class is invalid", ((Proxy) instance).getProxyBaseClass(), is(MarkingTestClass.class));
 
         instance.method();
         assertThat("method was not called", instance.getAndClearFlag());
@@ -65,5 +73,18 @@ public class AsmProxyProviderTest
         assertThat("method was not called", instance.getAndClearFlag());
         assertThat("handler was not called", not(handler.getAndClearFlag()));
         assertThat(value, equalTo("hello"));
+    }
+
+    @Test
+    public void testInterface()
+    {
+        this.variant.registerModule(new ProxyEverythingModule(new InterfaceTestHandler()));
+
+        final InterfaceTest instance = this.variant.instantiate(InterfaceTest.class);
+        assertThat("instance base class is invalid", ((Proxy) instance).getProxyBaseClass(), is(InterfaceTest.class));
+
+        final int callCount = InterfaceTest.CallCount.VALUE;
+        instance.doSomething();
+        assertThat("method was not called", callCount + 1, is(InterfaceTest.CallCount.VALUE));
     }
 }

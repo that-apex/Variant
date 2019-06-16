@@ -19,7 +19,6 @@
             <groupId>net.mrgregorix.variant</groupId>
             <artifactId>variant-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
