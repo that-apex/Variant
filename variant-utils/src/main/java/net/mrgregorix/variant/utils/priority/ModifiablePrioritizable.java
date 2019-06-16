@@ -11,6 +11,8 @@ public interface ModifiablePrioritizable <T extends ModifiablePrioritizable<T>> 
      * Sets the priority for the current object, the lower the value the lower the priority.
      *
      * @param priority priority for the current object
+     *
+     * @see PriorityConstants
      */
     void setPriority(int priority);
 }

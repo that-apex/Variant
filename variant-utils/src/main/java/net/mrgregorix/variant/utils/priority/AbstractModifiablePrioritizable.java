@@ -7,7 +7,7 @@ package net.mrgregorix.variant.utils.priority;
  */
 public abstract class AbstractModifiablePrioritizable <T extends ModifiablePrioritizable<T>> implements ModifiablePrioritizable<T>
 {
-    private int priority;
+    private int priority = PriorityConstants.NORMAL;
 
     @Override
     public void setPriority(int priority)
