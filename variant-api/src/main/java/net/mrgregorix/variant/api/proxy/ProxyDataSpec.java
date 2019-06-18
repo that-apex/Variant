@@ -46,4 +46,16 @@ public class ProxyDataSpec <T>
     {
         proxy.getAdditionalProxyData().put(this.name, object);
     }
+
+    /**
+     * Checks whether any data described by this spec is present in the given proxy data.
+     *
+     * @param proxy proxy to check data from
+     *
+     * @return whether this spec's data is present
+     */
+    public boolean isPresent(final Proxy proxy)
+    {
+        return proxy.getAdditionalProxyData().containsKey(this.name);
+    }
 }
