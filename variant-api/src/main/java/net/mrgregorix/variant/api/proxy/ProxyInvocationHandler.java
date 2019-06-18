@@ -20,9 +20,9 @@ public interface ProxyInvocationHandler <T extends ProxyInvocationHandler<T>> ex
      *
      * @return a result describing what to do with this invocation, either {@link BeforeInvocationResult#proceed()} or {@link BeforeInvocationResult#returnNow(Object)} may be used
      *
-     * @throws Throwable any exception thrown by this method will just be rethrown
+     * @throws Exception any exception thrown by this method will just be rethrown
      */
-    BeforeInvocationResult beforeInvocation(Proxy proxy, Method method, Object[] arguments) throws Throwable;
+    BeforeInvocationResult beforeInvocation(Proxy proxy, Method method, Object[] arguments) throws Exception;
 
     /**
      * Called after an invocation of the super method (or instantly after the {@link #beforeInvocation(Proxy, Method, Object[])} call in case of the super method being abstract).
@@ -34,7 +34,7 @@ public interface ProxyInvocationHandler <T extends ProxyInvocationHandler<T>> ex
      *
      * @return the value to be returned from proxied function, if you do not wish to alter the return value just return a value passed from {@code returnValue} parameter.
      *
-     * @throws Throwable any exception thrown by this method will just be rethrown
+     * @throws Exception any exception thrown by this method will just be rethrown
      */
-    Object afterInvocation(Proxy proxy, Method method, Object[] arguments, Object returnValue) throws Throwable;
+    Object afterInvocation(Proxy proxy, Method method, Object[] arguments, Object returnValue) throws Exception;
 }

@@ -208,7 +208,7 @@ public class VariantImpl implements Variant
                 MemberUtils.getAllMethods(type)
                            .stream()
                            .filter(method -> method.getDeclaringClass() != Object.class)
-                           .filter(method -> !Modifier.isFinal(method.getModifiers()) && !Modifier.isPrivate(method.getModifiers()) && method.getDeclaredAnnotation(NoProxy.class) == null)
+                           .filter(method -> ! Modifier.isFinal(method.getModifiers()) && ! Modifier.isPrivate(method.getModifiers()) && method.getDeclaredAnnotation(NoProxy.class) == null)
                            .map(method -> {
                                try
                                {
@@ -336,12 +336,9 @@ public class VariantImpl implements Variant
             this.dataLock.writeLock().lock();
             this.modules.add(module);
 
-            for (final VariantModule m : this.modules)
-            {
-                this.proxySpecifications.addAll(m.getProxySpecifications());
-                this.instantiationStrategies.addAll(m.getInstantiationStrategies());
-                this.afterInstantiationHandlers.addAll(m.getAfterInstantiationHandlers());
-            }
+            this.proxySpecifications.addAll(module.getProxySpecifications());
+            this.instantiationStrategies.addAll(module.getInstantiationStrategies());
+            this.afterInstantiationHandlers.addAll(module.getAfterInstantiationHandlers());
         }
         finally
         {

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mrgregorix.variant.api.proxy.BeforeInvocationResult;
 import net.mrgregorix.variant.api.proxy.ProxyInvocationHandler;
+import net.mrgregorix.variant.utils.exception.ExceptionUtils;
 
 /**
  * Internal helper class. This should never be used directly.
@@ -53,13 +54,13 @@ public class AsmProxyHelperInternal
             return returnValue;
         }
 
-        Object actualReturn = returnValue;
+        Object[] actualReturn = new Object[1];
 
         for (final ProxyInvocationHandler<?> handler : handlers)
         {
             try
             {
-                actualReturn = handler.afterInvocation(proxy, method, arguments, actualReturn);
+                actualReturn[0] = ExceptionUtils.marker(() -> handler.afterInvocation(proxy, method, arguments, actualReturn[0]));
             }
             catch (final Throwable throwable)
             {
@@ -67,7 +68,7 @@ public class AsmProxyHelperInternal
             }
         }
 
-        return actualReturn;
+        return actualReturn[0];
     }
 
     public static int getId()
