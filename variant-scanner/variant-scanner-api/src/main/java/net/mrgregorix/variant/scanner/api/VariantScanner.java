@@ -8,6 +8,7 @@ import net.mrgregorix.variant.api.module.ModuleImplementation;
 import net.mrgregorix.variant.api.module.VariantModule;
 import net.mrgregorix.variant.inject.api.annotation.Inject;
 import net.mrgregorix.variant.inject.api.annotation.info.InjectableSingleton;
+import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
 
 /**
  * The core class for the Variant Scanner module. It allows to instantiate classes in bulk, while maintaining the correct load order.
@@ -19,6 +20,14 @@ import net.mrgregorix.variant.inject.api.annotation.info.InjectableSingleton;
 @ModuleImplementation("net.mrgregorix.variant.scanner.core.VariantScannerImpl")
 public interface VariantScanner extends VariantModule
 {
+    /**
+     * Get all the objects that were ever instantiated by this scanner.
+     *
+     * @return all the objects that were ever instantiated by this scanner.
+     */
+    @CollectionMayBeImmutable
+    Collection<Object> getAllObjects();
+
     /**
      * Instantiates all the given classes using {@link Variant#instantiate(Class)} in a correct order.
      * <p>

@@ -3,12 +3,14 @@ package net.mrgregorix.variant.scanner.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.google.common.collect.ImmutableSet;
 import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.inject.api.VariantInjector;
 import net.mrgregorix.variant.inject.api.injector.SimpleSingletonCustomInjector;
@@ -17,6 +19,8 @@ import net.mrgregorix.variant.inject.core.injector.SimpleSingletonCustomInjector
 import net.mrgregorix.variant.scanner.api.Managed;
 import net.mrgregorix.variant.scanner.api.VariantScanner;
 import net.mrgregorix.variant.utils.annotation.AnnotationUtils;
+import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
+import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 import net.mrgregorix.variant.utils.exception.DependencyException;
 import net.mrgregorix.variant.utils.graph.DirectedGraph;
 import net.mrgregorix.variant.utils.graph.GraphSortUtils;
@@ -29,13 +33,20 @@ public class VariantScannerImpl implements VariantScanner
 {
     public static final String MODULE_NAME = "Variant::Scanner::Core";
 
-    private Variant         variant;
-    private VariantInjector variantInjector;
+    private final CollectionWithImmutable<Object, ImmutableSet<Object>> objects = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
+    private       Variant                                               variant;
+    private       VariantInjector                                       variantInjector;
 
     @Override
     public String getName()
     {
         return VariantScannerImpl.MODULE_NAME;
+    }
+
+    @Override
+    public Collection<Object> getAllObjects()
+    {
+        return this.objects.getImmutable();
     }
 
     @Override
@@ -68,7 +79,20 @@ public class VariantScannerImpl implements VariantScanner
                     continue;
                 }
 
-                dependencyGraph.addEdge(element.getType(), clazz);
+                Class<?> type = element.getType();
+                if (!classes.contains(type))
+                {
+                    for (final Class<?> testedClass : classes)
+                    {
+                        if (type.isAssignableFrom(testedClass))
+                        {
+                            type = testedClass;
+                            break;
+                        }
+                    }
+                }
+
+                dependencyGraph.addEdge(type, clazz);
             }
         }
 
@@ -83,6 +107,7 @@ public class VariantScannerImpl implements VariantScanner
             createdObjects.add(createdObject);
         }
 
+        this.objects.addAll(createdObjects);
         return createdObjects;
     }
 
