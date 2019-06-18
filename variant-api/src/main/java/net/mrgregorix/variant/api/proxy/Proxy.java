@@ -29,7 +29,7 @@ public interface Proxy
     {
         for (final Class<?> anInterface : this.getClass().getInterfaces())
         {
-            if (!Proxy.class.isAssignableFrom(anInterface))
+            if (! Proxy.class.isAssignableFrom(anInterface))
             {
                 return anInterface;
             }

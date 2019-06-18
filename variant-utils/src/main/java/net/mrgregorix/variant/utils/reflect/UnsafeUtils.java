@@ -44,7 +44,7 @@ public class UnsafeUtils
     /**
      * Checks if the unsafe instance is available. If it's {@code false} you can use {@link #getUnavailabilityCause()} to check the cause.
      *
-     * @return if the unsafe instance is availabel
+     * @return if the unsafe instance is available
      */
     public static boolean isAvailable()
     {

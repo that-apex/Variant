@@ -32,12 +32,12 @@ public class AnnotationUtilsTest
     }
 
     @Base
-    class TestClass
+    static class TestClass
     {
     }
 
     @Sub
-    class TestClass2
+    static class TestClass2
     {
     }
 }
