@@ -17,5 +17,7 @@
         <module>variant-rpc-api</module>
         <module>variant-rpc-core</module>
         <module>variant-rpc-scanner-integration</module>
+        <module>variant-rpc-netty-networking</module>
+        <module>variant-rpc-tests</module>
     </modules>
 </project>

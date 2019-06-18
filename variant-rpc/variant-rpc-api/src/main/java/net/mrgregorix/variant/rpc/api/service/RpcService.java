@@ -1,12 +1,8 @@
 package net.mrgregorix.variant.rpc.api.service;
 
-import net.mrgregorix.variant.rpc.api.base.RpcServiceName;
-import net.mrgregorix.variant.utils.annotation.AnnotationUtils;
-
+/**
+ * Represents a RPC service. All calls to this service's methods are to be executed on a remote server and are blocking.
+ */
 public interface RpcService
 {
-    default String getName()
-    {
-        return AnnotationUtils.getAnnotation(this.getClass(), RpcServiceName.class).value();
-    }
 }

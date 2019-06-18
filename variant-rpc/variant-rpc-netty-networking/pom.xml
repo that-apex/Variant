@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>variant-rpc</artifactId>
+        <groupId>net.mrgregorix.variant</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>variant-rpc-netty-networking</artifactId>
+
+    <name>Variant - RPC - Netty Networking</name>
+    <description>Variant RPC Networking implementation using the Netty library</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-rpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-rpc-tests</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-inject-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -23,10 +23,34 @@
             <groupId>net.mrgregorix.variant</groupId>
             <artifactId>variant-scanner-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.mrgregorix.variant</groupId>
             <artifactId>variant-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-inject-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-rpc-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-scanner-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-rpc-netty-networking</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

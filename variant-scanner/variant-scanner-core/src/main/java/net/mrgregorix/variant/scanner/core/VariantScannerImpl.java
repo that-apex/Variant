@@ -80,7 +80,7 @@ public class VariantScannerImpl implements VariantScanner
                 }
 
                 Class<?> type = element.getType();
-                if (!classes.contains(type))
+                if (! classes.contains(type))
                 {
                     for (final Class<?> testedClass : classes)
                     {

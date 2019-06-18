@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariantRpc>
+    <Group>
+        <Id>siema123</Id>
+
+        <RemoteServer>
+            <Ip>174.125.16.7</Ip>
+            <Port>8445</Port>
+        </RemoteServer>
+    </Group>
+
+    <Group>
+        <Group>rpc-provider</Group>
+
+        <RemoteClient>
+            <Ip>174.125.16.7</Ip>
+            <Port>8445</Port>
+            <Comment>SRV: variant1.rpc.internals.variant.net</Comment>
+
+            <Authentication>
+                <PrivateKeyAuthentication store="keystore.jks"/>
+
+                <IpAuthentication>
+                    <Whitelist>
+                        <Entry>174.125.16.1</Entry>
+                    </Whitelist>
+                </IpAuthentication>
+            </Authentication>
+        </RemoteClient>
+    </Group>
+</VariantRpc>

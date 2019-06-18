@@ -21,6 +21,10 @@
     <name>Variant - Parent</name>
     <description>Parent project for all core variant modules</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <build>
         <defaultGoal>clean install</defaultGoal>
 
@@ -122,7 +126,17 @@
             </dependency>
             <dependency>
                 <groupId>net.mrgregorix.variant</groupId>
-                <artifactId>variant-rpc-inject-integration</artifactId>
+                <artifactId>variant-rpc-netty-networking</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-rpc-scanner-integration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-rpc-tests</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -150,6 +164,21 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>0.9.11</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>4.1.36.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>2.11.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>2.9.8</version>
             </dependency>
 
             <dependency>

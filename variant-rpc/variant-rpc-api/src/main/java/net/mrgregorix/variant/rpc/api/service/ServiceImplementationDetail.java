@@ -2,23 +2,45 @@ package net.mrgregorix.variant.rpc.api.service;
 
 import java.util.Objects;
 
+/**
+ * Represents a details on how to implement a {@link RpcService}
+ *
+ * @param <ServiceT> type of the service class
+ * @param <ImplT>    type of the implementation class.
+ */
 public class ServiceImplementationDetail <ServiceT extends RpcService, ImplT extends ServiceT>
 {
     private final Class<ServiceT> service;
-    private final Class<ImplT>    implementation;
+    private final ImplT           implementation;
 
-    public ServiceImplementationDetail(final Class<ServiceT> service, final Class<ImplT> implementation)
+    /**
+     * Constructs a new ServiceImplementationDetail
+     *
+     * @param service        a {@link RpcService} to be implemented
+     * @param implementation implementation to use.
+     */
+    public ServiceImplementationDetail(final Class<ServiceT> service, final ImplT implementation)
     {
         this.service = service;
         this.implementation = implementation;
     }
 
+    /**
+     * Returns the service to be implemented
+     *
+     * @return the service to be implemented
+     */
     public Class<ServiceT> getService()
     {
         return this.service;
     }
 
-    public Class<ImplT> getImplementation()
+    /**
+     * Returns the implementation
+     *
+     * @return the implementation
+     */
+    public ImplT getImplementation()
     {
         return this.implementation;
     }

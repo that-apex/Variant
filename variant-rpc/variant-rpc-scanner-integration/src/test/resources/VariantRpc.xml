@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariantRpc>
+    <Group>
+        <Id>test-server</Id>
+
+        <Server>
+            <Ip>174.125.16.7</Ip>
+            <Port>8445</Port>
+        </Server>
+    </Group>
+
+    <Group>
+        <Id>test-client</Id>
+
+        <Client>
+            <Ip>174.125.16.7</Ip>
+            <Port>8445</Port>
+            <Comment>Test comment</Comment>
+        </Client>
+    </Group>
+</VariantRpc>
