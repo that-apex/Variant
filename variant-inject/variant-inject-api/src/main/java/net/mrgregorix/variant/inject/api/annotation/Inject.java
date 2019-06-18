@@ -13,7 +13,7 @@ import net.mrgregorix.variant.inject.api.injector.SimpleSingletonCustomInjector;
  * <p>
  * Either a constructor or a field can be annotated with this annotation, but using only constructor injection is strongly encouraged.
  */
-@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @OnlyForProxiedClasses
 public @interface Inject
