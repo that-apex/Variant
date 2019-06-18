@@ -22,7 +22,7 @@ public class SimpleSingletonCustomInjectorImpl extends AbstractModifiablePriorit
 
     public SimpleSingletonCustomInjectorImpl()
     {
-        this.setPriority(PriorityConstants.HIGHEST);
+        this.setPriority(PriorityConstants.NEARLY_HIGHEST);
     }
 
     @Override
