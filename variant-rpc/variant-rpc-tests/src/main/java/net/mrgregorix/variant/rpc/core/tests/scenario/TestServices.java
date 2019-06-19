@@ -17,9 +17,7 @@ import static org.hamcrest.Matchers.*;
 
 public class TestServices
 {
-    public static int PORT = 2734;
-
-    public static void testServices(final VariantRpc variantRpc, boolean persistent)
+    public static void testServices(final VariantRpc variantRpc, boolean persistent, int port)
     {
         try
         {
@@ -27,8 +25,8 @@ public class TestServices
 
             variantRpc.getSerializerSpec().registerSerializer(new DateSerializer());
 
-            final RpcNetworkServer server = variantRpc.setupServer("test-server", "127.0.0.1", PORT, Collections.singletonList(new ServiceImplementationDetail<>(SimpleRpcService.class, new SimpleRpcServiceImpl())));
-            final RpcNetworkClient client = variantRpc.setupClient("test-client", "127.0.0.1", PORT, Collections.singletonList(SimpleRpcService.class), persistent);
+            final RpcNetworkServer server = variantRpc.setupServer("test-server", "127.0.0.1", port, Collections.singletonList(new ServiceImplementationDetail<>(SimpleRpcService.class, new SimpleRpcServiceImpl())));
+            final RpcNetworkClient client = variantRpc.setupClient("test-client", "127.0.0.1", port, Collections.singletonList(SimpleRpcService.class), persistent);
             server.startBlocking();
             client.startBlocking();
 

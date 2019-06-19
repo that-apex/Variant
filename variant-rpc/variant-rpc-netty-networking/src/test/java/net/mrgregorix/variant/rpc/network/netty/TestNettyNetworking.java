@@ -28,12 +28,12 @@ public class TestNettyNetworking
     @Test
     public void testPersistent()
     {
-        TestServices.testServices(this.rpc, true);
+        TestServices.testServices(this.rpc, true, 2734);
     }
 
     @Test
     public void testNonPersistent()
     {
-        TestServices.testServices(this.rpc, false);
+        TestServices.testServices(this.rpc, false, 2735);
     }
 }
