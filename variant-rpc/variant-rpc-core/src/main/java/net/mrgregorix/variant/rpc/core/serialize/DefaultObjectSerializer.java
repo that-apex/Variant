@@ -137,7 +137,7 @@ public class DefaultObjectSerializer implements TypeSerializer<Object>
             declaredField.setAccessible(true);
             try
             {
-                declaredField.set(object, (((TypeSerializer<Object>) this.defaultSerializer.getSerializerByClass(declaredField.getClass())).deserialize(data)));
+                declaredField.set(object, ((TypeSerializer) this.defaultSerializer.getSerializerByClass(declaredField.getClass())).deserialize(data));
             }
             catch (final IllegalAccessException e)
             {

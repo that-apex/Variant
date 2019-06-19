@@ -3,6 +3,7 @@ package net.mrgregorix.variant.rpc.core.serialize;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -33,7 +34,12 @@ public class ArraySerializer implements TypeSerializer<Object>
     @Override
     public Collection<Class<?>> usedTypes(final Class<?> type)
     {
-        return Collections.singletonList(type.arrayType());
+        return Collections.singletonList(this.arrayType(type));
+    }
+
+    private Class<?> arrayType(final Class<?> type)
+    {
+        return Array.newInstance(type, 0).getClass(); // todo maybe do it better, in the future xd
     }
 
     @Override
@@ -74,7 +80,7 @@ public class ArraySerializer implements TypeSerializer<Object>
     @Override
     public void serialize(final DataOutputStream data, final Object object) throws IOException
     {
-        final TypeSerializer<Object> typeSerializer = (TypeSerializer<Object>) this.dataSerializer.getSerializerByClass(object.getClass().arrayType());
+        final TypeSerializer<Object> typeSerializer = (TypeSerializer<Object>) this.dataSerializer.getSerializerByClass(this.arrayType(object.getClass()));
         data.writeUTF(typeSerializer.getIdentifier());
 
         final Object[] array = (Object[]) object;

@@ -18,6 +18,12 @@ public class DateSerializer implements TypeSerializer<Date>
     }
 
     @Override
+    public Class<? extends Date> getMainType()
+    {
+        return Date.class;
+    }
+
+    @Override
     public String getIdentifier()
     {
         return "Test::Date";
@@ -33,5 +39,11 @@ public class DateSerializer implements TypeSerializer<Date>
     public Date deserialize(DataInputStream data) throws IOException
     {
         return new Date(data.readLong());
+    }
+
+    @Override
+    public void deserialize(final Date object, final DataInputStream data) throws IOException
+    {
+        object.setTime(data.readLong());
     }
 }
