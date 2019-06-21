@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>variant-commands</artifactId>
+        <groupId>net.mrgregorix.variant</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>variant-commands-core</artifactId>
+
+    <name>Variant - Commands - Core</name>
+    <description>Variant Commands's Implementation</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-commands-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
