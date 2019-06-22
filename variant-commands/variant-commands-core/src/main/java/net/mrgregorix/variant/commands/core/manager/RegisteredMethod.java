@@ -2,17 +2,17 @@ package net.mrgregorix.variant.commands.core.manager;
 
 import java.lang.reflect.Method;
 
-import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.CommandListener;
 import net.mrgregorix.variant.commands.api.annotation.Command;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.core.CommandInfoImpl;
 import net.mrgregorix.variant.utils.annotation.Nullable;
 
 public class RegisteredMethod
 {
     private final String              prefix;
     private final Command             command;
-    private final CommandInfo         commandInfo;
+    private final CommandInfoImpl     commandInfo;
     private final Method              method;
     private final CommandListener     listener;
     @Nullable
@@ -22,9 +22,8 @@ public class RegisteredMethod
     private final ParameterResolver[] parameterResolvers;
     private final int                 level;
 
-    public RegisteredMethod(final String prefix, final Command command, final CommandInfo commandInfo, final Method method, final CommandListener listener, @Nullable final RegisteredMethod parentMethod,
-                            final TypeDefinition[] argumentDefinitions,
-                            final TypeDefinition[] flagDefinitions, final ParameterResolver[] parameterResolvers, final int level)
+    public RegisteredMethod(final String prefix, final Command command, final CommandInfoImpl commandInfo, final Method method, final CommandListener listener, @Nullable final RegisteredMethod parentMethod,
+                            final TypeDefinition[] argumentDefinitions, final TypeDefinition[] flagDefinitions, final ParameterResolver[] parameterResolvers, final int level)
     {
         this.prefix = prefix;
         this.command = command;
@@ -48,7 +47,7 @@ public class RegisteredMethod
         return this.command;
     }
 
-    public CommandInfo getCommandInfo()
+    public CommandInfoImpl getCommandInfo()
     {
         return this.commandInfo;
     }

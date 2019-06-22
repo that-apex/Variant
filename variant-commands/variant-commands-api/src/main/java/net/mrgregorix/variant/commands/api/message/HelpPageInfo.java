@@ -13,4 +13,6 @@ public interface HelpPageInfo
     int getPrevious();
 
     int getNext();
+
+    String getHelpCommand();
 }

@@ -16,9 +16,39 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
     private static final List<String> TRUE_VALUES  = Arrays.asList("true", "yes", "y", "1");
     private static final List<String> FALSE_VALUES = Arrays.asList("false", "no", "n", "0");
 
+    private List<String> trueValues;
+    private List<String> falseValues;
+
     public BooleanTypeParser()
     {
+        this(TRUE_VALUES, FALSE_VALUES);
+    }
+
+    public BooleanTypeParser(final List<String> trueValues, final List<String> falseValues)
+    {
         super(Boolean.class, boolean.class);
+        this.trueValues = trueValues;
+        this.falseValues = falseValues;
+    }
+
+    public List<String> getTrueValues()
+    {
+        return this.trueValues;
+    }
+
+    public List<String> getFalseValues()
+    {
+        return this.falseValues;
+    }
+
+    public void setTrueValues(final List<String> trueValues)
+    {
+        this.trueValues = trueValues;
+    }
+
+    public void setFalseValues(final List<String> falseValues)
+    {
+        this.falseValues = falseValues;
     }
 
     @Override
@@ -36,11 +66,11 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
             throw new UseDefaultTypeException();
         }
 
-        if (TRUE_VALUES.contains(stringValue.toLowerCase()))
+        if (this.trueValues.contains(stringValue.toLowerCase()))
         {
             return true;
         }
-        else if (FALSE_VALUES.contains(stringValue.toLowerCase()))
+        else if (this.falseValues.contains(stringValue.toLowerCase()))
         {
             return false;
         }
@@ -51,6 +81,11 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
     @Override
     public Boolean parseDefaultValue(final ArgumentParser argumentParser, final TypeDefinition defaultValue) throws ParsingException
     {
+        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().length() == 0)
+        {
+            return null;
+        }
+
         return this.fromString(defaultValue.defaultValue());
     }
 }

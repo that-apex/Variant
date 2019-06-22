@@ -25,6 +25,7 @@ public class DefaultTypeParsers
         PARSERS.add(new CharacterTypeParser());
         PARSERS.add(new StringTypeParser());
         PARSERS.add(new CollectionTypeParser());
+        PARSERS.add(new HelpPageTypeParser());
     }
 
     public static void register(final ArgumentParser argumentParser)

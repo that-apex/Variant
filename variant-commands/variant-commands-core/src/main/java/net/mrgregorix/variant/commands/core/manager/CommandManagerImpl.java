@@ -7,18 +7,21 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import net.mrgregorix.variant.api.proxy.Proxy;
+import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.CommandListener;
 import net.mrgregorix.variant.commands.api.CommandSender;
-import net.mrgregorix.variant.commands.api.VariantCommands;
 import net.mrgregorix.variant.commands.api.annotation.Argument;
 import net.mrgregorix.variant.commands.api.annotation.Command;
 import net.mrgregorix.variant.commands.api.annotation.Flag;
 import net.mrgregorix.variant.commands.api.annotation.Subcommand;
+import net.mrgregorix.variant.commands.api.annotation.meta.ForType;
 import net.mrgregorix.variant.commands.api.annotation.meta.ParameterDescription;
 import net.mrgregorix.variant.commands.api.manager.CommandManager;
+import net.mrgregorix.variant.commands.api.manager.ForTypeMismatchException;
 import net.mrgregorix.variant.commands.api.manager.UnknownCommandException;
 import net.mrgregorix.variant.commands.api.manager.ValueProvider;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
@@ -41,11 +44,9 @@ public class CommandManagerImpl implements CommandManager
 {
     private final CollectionWithImmutable<ValueProvider<?>, ImmutableList<ValueProvider<?>>> providers         = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
     private final List<RegisteredMethod>                                                     registeredMethods = new ArrayList<>();
-    private final VariantCommands variantCommands;
 
-    public CommandManagerImpl(final VariantCommands variantCommands)
+    public CommandManagerImpl()
     {
-        this.variantCommands = variantCommands;
         this.registerValueProvider(new SenderValueProvider());
         this.registerValueProvider(new CommandInfoValueProvider());
         this.registerValueProvider(new FullCommandValueProvider());
@@ -85,6 +86,29 @@ public class CommandManagerImpl implements CommandManager
 
             this.handleMethod(method, commandAnnotation, listener);
         }
+
+        for (final RegisteredMethod registeredMethod : this.registeredMethods)
+        {
+            if (registeredMethod.getCommandInfo().getSubcommands() == null)
+            {
+                final List<CommandInfoImpl> subcommands = this.registeredMethods
+                    .stream()
+                    .filter(it -> it.getParentMethod() == registeredMethod)
+                    .map(RegisteredMethod::getCommandInfo)
+                    .collect(Collectors.toList());
+
+                registeredMethod.getCommandInfo().setSubcommands(subcommands);
+            }
+        }
+    }
+
+    @Override
+    public Collection<? extends CommandInfo> getAllCommandInfos()
+    {
+        return this.registeredMethods
+            .stream()
+            .map(RegisteredMethod::getCommandInfo)
+            .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -129,6 +153,15 @@ public class CommandManagerImpl implements CommandManager
 
                     parameterDescription = declaredAnnotation;
                 }
+
+                final ForType forType = declaredAnnotation.annotationType().getAnnotation(ForType.class);
+                if (forType != null)
+                {
+                    if (!forType.value().isAssignableFrom(parameter.getType()))
+                    {
+                        throw new ForTypeMismatchException(parameter + " must be of type " + forType.value());
+                    }
+                }
             }
 
             if (parameterDescription == null)
@@ -161,7 +194,7 @@ public class CommandManagerImpl implements CommandManager
 
                     if (provider != null)
                     {
-                        throw new IllegalArgumentException("Parmeter " + i + ": " + parameter + " has multiple value providers");
+                        throw new IllegalArgumentException("Parameter " + i + ": " + parameter + " has multiple value providers");
                     }
 
                     provider = (ValueProvider<Annotation>) test;
@@ -178,6 +211,44 @@ public class CommandManagerImpl implements CommandManager
             }
         }
 
+        final StringBuilder usage = new StringBuilder();
+        if (! commandAnnotation.usage().isEmpty())
+        {
+            usage.append(commandAnnotation.usage());
+        }
+        else
+        {
+            for (int i = 0; i < flagDefinitions.size(); i++)
+            {
+                final TypeDefinition flagDefinition = flagDefinitions.get(i);
+                usage.append("[-").append(flagDefinition.getName());
+                if (flagDefinition.getType() != boolean.class)
+                {
+                    usage.append(" <value>");
+                }
+                usage.append("]");
+
+                if (i != flagDefinitions.size() - 1 || !
+                    argumentDefinitions.isEmpty())
+                {
+                    usage.append(" ");
+                }
+            }
+
+            for (int i = 0; i < argumentDefinitions.size(); i++)
+            {
+                final TypeDefinition argumentDefinition = argumentDefinitions.get(i);
+                usage.append(argumentDefinition.isRequired() ? "<" : "[");
+                usage.append(argumentDefinition.getName());
+                usage.append(argumentDefinition.isRequired() ? ">" : "]");
+
+                if (i != argumentDefinitions.size() - 1)
+                {
+                    usage.append(" ");
+                }
+            }
+        }
+
         int level = 0;
         RegisteredMethod parent = parentMethod;
 
@@ -190,7 +261,7 @@ public class CommandManagerImpl implements CommandManager
         this.registeredMethods.add(new RegisteredMethod(
             prefix,
             commandAnnotation,
-            new CommandInfoImpl(commandAnnotation, this.variantCommands),
+            new CommandInfoImpl(commandAnnotation, usage.toString(), prefix),
             method,
             listener,
             parentMethod,

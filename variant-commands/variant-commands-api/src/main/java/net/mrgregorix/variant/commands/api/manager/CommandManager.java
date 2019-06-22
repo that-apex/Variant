@@ -2,6 +2,7 @@ package net.mrgregorix.variant.commands.api.manager;
 
 import java.util.Collection;
 
+import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.CommandListener;
 import net.mrgregorix.variant.commands.api.CommandSender;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
@@ -18,6 +19,8 @@ public interface CommandManager
     boolean unregisterValueProvider(ValueProvider<?> parser);
     
     void registerListener(CommandListener listener);
+
+    Collection<? extends CommandInfo> getAllCommandInfos();
 
     void invoke(CommandSender sender, ArgumentParser parser, String commandString) throws ParsingException;
 }

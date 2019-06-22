@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ForType // todo validation
+public @interface ForType
 {
     Class<?> value();
 }

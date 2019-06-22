@@ -142,6 +142,7 @@ public class ArgumentParserImpl implements ArgumentParser
                     if (! definition.isRequired())
                     {
                         objects.add(parser.parseDefaultValue(this, definition));
+                        continue;
                     }
                     else
                     {

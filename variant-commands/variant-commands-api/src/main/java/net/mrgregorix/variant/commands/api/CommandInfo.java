@@ -1,10 +1,16 @@
 package net.mrgregorix.variant.commands.api;
 
-import net.mrgregorix.variant.commands.api.annotation.Command;
+import java.util.Collection;
 
 public interface CommandInfo
 {
-    Command getCommandAnnotation();
+    String getName();
 
-    void sendHelp(CommandSender sender);
+    String getDescription();
+
+    String getUsage();
+
+    String getFullPrefix();
+
+    Collection<? extends CommandInfo> getSubcommands();
 }

@@ -23,6 +23,11 @@ public class CharacterTypeParser extends PrimitiveTypeParser<Character>
     @Override
     public Character parseDefaultValue(final ArgumentParser argumentParser, final TypeDefinition defaultValue) throws ParsingException
     {
+        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().length() == 0)
+        {
+            return null;
+        }
+
         if (defaultValue.defaultValue().length() != 1)
         {
             throw new ValueSyntaxException("'" + defaultValue.defaultValue() + "' is not a character", char.class);

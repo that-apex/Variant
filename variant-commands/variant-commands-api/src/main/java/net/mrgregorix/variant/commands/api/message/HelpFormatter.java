@@ -1,7 +1,6 @@
 package net.mrgregorix.variant.commands.api.message;
 
 import net.mrgregorix.variant.commands.api.CommandInfo;
-import net.mrgregorix.variant.utils.annotation.Nullable;
 
 public interface HelpFormatter
 {
@@ -9,7 +8,7 @@ public interface HelpFormatter
 
     String formatHeaderForList(HelpPageInfo info);
 
-    String formatHelpEntry(@Nullable CommandInfo mainCommand, CommandInfo subCommand);
+    String formatHelpEntry(CommandInfo command);
 
     String formatFooterForList(HelpPageInfo info);
 }

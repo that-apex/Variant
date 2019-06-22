@@ -83,6 +83,11 @@ public class NumberTypeParser <N extends Number> extends PrimitiveTypeParser<N>
     @Override
     public N parseDefaultValue(final ArgumentParser argumentParser, final TypeDefinition defaultValue) throws ParsingException
     {
+        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().length() == 0)
+        {
+            return null;
+        }
+
         try
         {
             return this.parseInteger.apply(defaultValue.defaultValue(), this.radix(defaultValue));
