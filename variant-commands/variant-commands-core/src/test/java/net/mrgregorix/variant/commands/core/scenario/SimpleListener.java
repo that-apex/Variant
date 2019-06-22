@@ -5,16 +5,34 @@ import java.util.stream.Collectors;
 
 import net.mrgregorix.variant.commands.api.CommandListener;
 import net.mrgregorix.variant.commands.api.CommandSender;
+import net.mrgregorix.variant.commands.api.VariantCommands;
 import net.mrgregorix.variant.commands.api.annotation.Argument;
 import net.mrgregorix.variant.commands.api.annotation.Command;
 import net.mrgregorix.variant.commands.api.annotation.Flag;
+import net.mrgregorix.variant.commands.api.annotation.FullCommand;
 import net.mrgregorix.variant.commands.api.annotation.Sender;
 import net.mrgregorix.variant.commands.api.annotation.types.CollectionType;
-import net.mrgregorix.variant.commands.api.annotation.FullCommand;
 import net.mrgregorix.variant.commands.api.annotation.types.Raw;
+import net.mrgregorix.variant.commands.api.message.HelpPage;
 
 public class SimpleListener implements CommandListener
 {
+    private final VariantCommands variantCommands;
+
+    public SimpleListener(final VariantCommands variantCommands)
+    {
+        this.variantCommands = variantCommands;
+    }
+
+    @Command(
+        name = "help",
+        description = "help page"
+    )
+    public void showHelp(@Sender final CommandSender sender, @Argument(required = false) final HelpPage helpPage)
+    {
+        this.variantCommands.sendHelp(sender, helpPage);
+    }
+
     @Command(
         name = "hello_world",
         description = "Hello world! :0"
