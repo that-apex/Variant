@@ -15,6 +15,7 @@ import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.UseDefaultTypeException;
 import net.mrgregorix.variant.commands.api.parser.exception.NoDefaultValueException;
 import net.mrgregorix.variant.commands.api.parser.exception.NoFlagFoundException;
+import net.mrgregorix.variant.commands.api.parser.exception.NoValueForFlagFoundException;
 import net.mrgregorix.variant.commands.api.parser.exception.NotEnoughParametersException;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.TooManyParametersException;
@@ -105,8 +106,21 @@ public class ArgumentParserImpl implements ArgumentParser
                 continue;
             }
 
-            final Object type = this.getParserFor(flagDefinition.getType()).parseType(this, stringParser, flagDefinition);
-            flags.put(flagDefinition, type);
+            try
+            {
+                if (stringParser.isFinished())
+                {
+                    throw new NoValueForFlagFoundException("Value for flag " + flagDefinition.getName() + " is required");
+                }
+
+                final Object type = this.getParserFor(flagDefinition.getType()).parseType(this, stringParser, flagDefinition);
+                flags.put(flagDefinition, type);
+            }
+            catch (final ParsingException e)
+            {
+                e.setDefinition(flagDefinition);
+                throw e;
+            }
 
             stringParser.skipAll(' ');
         }
@@ -118,8 +132,16 @@ public class ArgumentParserImpl implements ArgumentParser
                 continue;
             }
 
-            final Object defaultValue = this.getParserFor(flagDefinition.getType()).parseDefaultValue(this, flagDefinition);
-            flags.put(flagDefinition, defaultValue);
+            try
+            {
+                final Object defaultValue = this.getParserFor(flagDefinition.getType()).parseDefaultValue(this, flagDefinition);
+                flags.put(flagDefinition, defaultValue);
+            }
+            catch (final ParsingException e)
+            {
+                e.setDefinition(flagDefinition);
+                throw e;
+            }
         }
 
         return flags;
