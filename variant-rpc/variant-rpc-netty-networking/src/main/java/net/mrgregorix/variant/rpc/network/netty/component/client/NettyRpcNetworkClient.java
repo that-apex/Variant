@@ -10,12 +10,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -40,14 +43,15 @@ import net.mrgregorix.variant.rpc.network.netty.configuration.ConfigurationFacto
  */
 public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent implements RpcNetworkClient
 {
-    private final AtomicInteger                     callId      = new AtomicInteger(0);
-    private final ReadWriteLock                     resultsLock = new ReentrantReadWriteLock();
-    private final Collection<RpcServiceCallResult>  results     = new ArrayList<>(); // todo: remove old entries!
-    private final List<Class<? extends RpcService>> services;
-    private final DataSerializer                    dataSerializer;
-    private       EventLoopGroup                    workerGroup;
-    private       Channel                           channel;
-    private       Method[]                          methodIds;
+    private final AtomicInteger                        callId      = new AtomicInteger(0);
+    private final ReadWriteLock                        resultsLock = new ReentrantReadWriteLock();
+    private final Cache<Integer, RpcServiceCallResult> results     = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+    private final List<Class<? extends RpcService>>    services;
+    private final DataSerializer                       dataSerializer;
+    private final Executor                             waitingExecutor;
+    private       EventLoopGroup                       workerGroup;
+    private       Channel                              channel;
+    private       Method[]                             methodIds;
 
     /**
      * Create a new NettyRpcNetworkClient
@@ -64,6 +68,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
         super(configurationFactory, name, address, port);
         this.services = new ArrayList<>(services);
         this.dataSerializer = dataSerializer;
+        this.waitingExecutor = configurationFactory.createWaitingExecutor();
     }
 
     @Override
@@ -215,12 +220,11 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                 this.resultsLock.readLock().lock();
                 try
                 {
-                    for (final RpcServiceCallResult result : this.results)
+                    final RpcServiceCallResult result = this.results.getIfPresent(callId);
+
+                    if (result != null)
                     {
-                        if (result.getCallId() == callId)
-                        {
-                            return result;
-                        }
+                        return result;
                     }
                 }
                 finally
@@ -245,7 +249,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                     throw new RuntimeException("Interrupted", e);
                 }
             }
-        }); // todo: executor?
+        }, this.waitingExecutor);
     }
 
     @Override
@@ -266,7 +270,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
         this.resultsLock.writeLock().lock();
         try
         {
-            this.results.add(rpcServiceCallResult);
+            this.results.put(rpcServiceCallResult.getCallId(), rpcServiceCallResult);
         }
         finally
         {

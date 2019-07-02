@@ -1,5 +1,7 @@
 package net.mrgregorix.variant.rpc.network.netty.configuration;
 
+import java.util.concurrent.Executor;
+
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -40,4 +42,11 @@ public interface ConfigurationFactory
      * @return the {@link Channel} type to be used by the client.
      */
     Class<? extends Channel> getClientChannel();
+
+    /**
+     * Creates an executor that will be used for waiting to call responses.
+     *
+     * @return an executor that will be used for waiting to call response.
+     */
+    Executor createWaitingExecutor();
 }
