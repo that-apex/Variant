@@ -43,9 +43,12 @@ import net.mrgregorix.variant.rpc.network.netty.configuration.ConfigurationFacto
  */
 public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent implements RpcNetworkClient
 {
+    private static final long MISSED_RESULTS_REFRESH_TIME = TimeUnit.SECONDS.toMillis(1);
+
     private final AtomicInteger                        callId      = new AtomicInteger(0);
     private final ReadWriteLock                        resultsLock = new ReentrantReadWriteLock();
-    private final Cache<Integer, RpcServiceCallResult> results     = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+    private final long                                 timeout;
+    private final Cache<Integer, RpcServiceCallResult> results;
     private final List<Class<? extends RpcService>>    services;
     private final DataSerializer                       dataSerializer;
     private final Executor                             waitingExecutor;
@@ -69,6 +72,8 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
         this.services = new ArrayList<>(services);
         this.dataSerializer = dataSerializer;
         this.waitingExecutor = configurationFactory.createWaitingExecutor();
+        this.timeout = configurationFactory.getCallTimeout();
+        this.results = CacheBuilder.newBuilder().expireAfterWrite(this.timeout + MISSED_RESULTS_REFRESH_TIME * 2, TimeUnit.SECONDS).build();
     }
 
     @Override
@@ -232,7 +237,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                     this.resultsLock.readLock().unlock();
                 }
 
-                if (System.currentTimeMillis() > requested + TimeUnit.SECONDS.toMillis(10)) // todo: configurable timeout?
+                if (System.currentTimeMillis() > requested + this.timeout)
                 {
                     return new FailedRpcCallResult(callId, new CallTimeoutException("Timeout when calling the method: " + method));
                 }
@@ -241,7 +246,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                 {
                     synchronized (this)
                     {
-                        this.wait(1000L);
+                        this.wait(MISSED_RESULTS_REFRESH_TIME);
                     }
                 }
                 catch (final InterruptedException e)

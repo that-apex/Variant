@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
+import net.mrgregorix.variant.rpc.api.network.exception.CallTimeoutException;
 
 /**
  * A factory for creating Netty-specific configurations
@@ -49,4 +50,11 @@ public interface ConfigurationFactory
      * @return an executor that will be used for waiting to call response.
      */
     Executor createWaitingExecutor();
+
+    /**
+     * Returns the timeout after which a {@link CallTimeoutException} will be thrown if no response for an RPC call was received.
+     *
+     * @return the call timeout
+     */
+    long getCallTimeout();
 }
