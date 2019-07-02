@@ -1,5 +1,8 @@
 package net.mrgregorix.variant.commands.api.parser.exception;
 
+/**
+ * Thrown when a default value for a parameter is requested, but the parameter has no default value defined.
+ */
 public class NoDefaultValueException extends ParsingException
 {
     public NoDefaultValueException()

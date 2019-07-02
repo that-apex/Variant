@@ -8,6 +8,9 @@ import java.lang.annotation.Target;
 import net.mrgregorix.variant.commands.api.annotation.meta.ForType;
 import net.mrgregorix.variant.commands.api.annotation.meta.ParameterDescription;
 
+/**
+ * A {@link ParameterDescription} that will provide a full string containing all method parameters.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 @ParameterDescription

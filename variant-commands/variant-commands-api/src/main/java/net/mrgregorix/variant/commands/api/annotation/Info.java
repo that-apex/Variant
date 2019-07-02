@@ -5,11 +5,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import net.mrgregorix.variant.commands.api.CommandInfo;
+import net.mrgregorix.variant.commands.api.annotation.meta.ForType;
 import net.mrgregorix.variant.commands.api.annotation.meta.ParameterDescription;
 
+/**
+ * A {@link ParameterDescription} for providing {@link CommandInfo} values
+ */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @ParameterDescription
+@ForType(CommandInfo.class)
 public @interface Info
 {
 }

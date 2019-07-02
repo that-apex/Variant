@@ -1,5 +1,8 @@
 package net.mrgregorix.variant.commands.api.parser.exception;
 
+/**
+ * Thrown when the command argument parsing was finished but there is still more data to parse.
+ */
 public class TooManyParametersException extends ParsingException
 {
     public TooManyParametersException()

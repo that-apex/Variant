@@ -1,5 +1,8 @@
 package net.mrgregorix.variant.commands.api.parser.exception;
 
+/**
+ * Thrown when the supplied value is of an incorrect syntax.
+ */
 public class ValueSyntaxException extends ParsingException
 {
     private final Class<?> type;
