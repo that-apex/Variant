@@ -10,7 +10,7 @@ import net.mrgregorix.variant.commands.api.annotation.Command;
 import net.mrgregorix.variant.commands.api.manager.ForTypeMismatchException;
 
 /**
- * Ensures that a parameter annotated with an annotation that has {@link ForType} on it is of type specifed by {@link #value()}.
+ * Ensures that a parameter annotated with an annotation that has {@link ForType} on it is of type specified by {@link #value()}.
  * <p>
  * Works only on {@link Command} annotated methods in registered {@link CommandListener}s
  * </p>

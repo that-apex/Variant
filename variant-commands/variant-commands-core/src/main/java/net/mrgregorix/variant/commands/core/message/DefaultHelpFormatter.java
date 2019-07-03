@@ -4,6 +4,9 @@ import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.message.HelpFormatter;
 import net.mrgregorix.variant.commands.api.message.HelpPageInfo;
 
+/**
+ * The default implementation of a {@link HelpFormatter}
+ */
 public class DefaultHelpFormatter implements HelpFormatter
 {
     @Override

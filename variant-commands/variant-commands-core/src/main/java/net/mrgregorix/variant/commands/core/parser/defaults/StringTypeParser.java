@@ -1,14 +1,17 @@
 package net.mrgregorix.variant.commands.core.parser.defaults;
 
-import net.mrgregorix.variant.commands.api.annotation.FullCommand;
 import net.mrgregorix.variant.commands.api.annotation.types.Raw;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.UseDefaultTypeException;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.StringSyntaxErrorException;
 
+/**
+ * A {@link TypeParser} for the {@link String type}
+ */
 public class StringTypeParser extends AbstractDefaultTypeParser<String, StringTypeParser>
 {
     @Override
@@ -20,11 +23,6 @@ public class StringTypeParser extends AbstractDefaultTypeParser<String, StringTy
     @Override
     public String parseType(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition typeDefinition) throws ParsingException
     {
-        if (typeDefinition.getAnnotation(FullCommand.class) != null)
-        {
-            return parser.getFullCommand();
-        }
-
         if (typeDefinition.getAnnotation(Raw.class) != null)
         {
             return parser.readCharactersTo(parser.getLength());

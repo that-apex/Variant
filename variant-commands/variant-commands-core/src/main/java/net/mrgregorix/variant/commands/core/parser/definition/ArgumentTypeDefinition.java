@@ -6,11 +6,20 @@ import java.lang.reflect.Parameter;
 import net.mrgregorix.variant.commands.api.annotation.Argument;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
 
+/**
+ * A {@link TypeDefinition} for a command argument.
+ */
 public class ArgumentTypeDefinition implements TypeDefinition
 {
     private final Parameter parameter;
-    private final Argument argument;
+    private final Argument  argument;
 
+    /**
+     * Creates a new FlagTypeDefinition
+     *
+     * @param parameter parameter annotated with {@link Argument}
+     * @param argument  the {@link Argument} annotation
+     */
     public ArgumentTypeDefinition(final Parameter parameter, final Argument argument)
     {
         this.parameter = parameter;

@@ -8,8 +8,10 @@ import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.core.scenario.SimpleListener;
 import net.mrgregorix.variant.commands.core.scenario.SubcommandsListener;
 import org.junit.jupiter.api.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
 public class TestCommands
 {
     @Test

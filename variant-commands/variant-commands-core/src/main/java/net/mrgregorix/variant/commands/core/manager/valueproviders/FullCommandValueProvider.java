@@ -8,6 +8,9 @@ import net.mrgregorix.variant.commands.api.annotation.FullCommand;
 import net.mrgregorix.variant.commands.api.manager.ValueProvider;
 import net.mrgregorix.variant.commands.api.parser.ParsingResult;
 
+/**
+ * A {@link ValueProvider} for {@link FullCommand}
+ */
 public class FullCommandValueProvider implements ValueProvider<FullCommand>
 {
     @Override

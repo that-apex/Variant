@@ -9,6 +9,9 @@ import net.mrgregorix.variant.commands.core.parser.defaults.primitive.BooleanTyp
 import net.mrgregorix.variant.commands.core.parser.defaults.primitive.CharacterTypeParser;
 import net.mrgregorix.variant.commands.core.parser.defaults.primitive.NumberTypeParser;
 
+/**
+ * Helper class for registering default type parsers
+ */
 public class DefaultTypeParsers
 {
     private static final List<TypeParser<?, ?>> PARSERS = new ArrayList<>();
@@ -28,6 +31,11 @@ public class DefaultTypeParsers
         PARSERS.add(new HelpPageTypeParser());
     }
 
+    /**
+     * Registers all the default type parsers to the given argument parser
+     *
+     * @param argumentParser {@link ArgumentParser} to registered the default types for
+     */
     public static void register(final ArgumentParser argumentParser)
     {
         PARSERS.forEach(argumentParser::registerTypeParser);

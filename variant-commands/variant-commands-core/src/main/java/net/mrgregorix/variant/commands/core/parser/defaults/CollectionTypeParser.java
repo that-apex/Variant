@@ -21,6 +21,13 @@ import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.core.parser.StringParserImpl;
 
+/**
+ * A {@link TypeParser} for basic {@link Collection} implementations
+ *
+ * @see Set
+ * @see List
+ * @see Queue
+ */
 public class CollectionTypeParser extends AbstractDefaultTypeParser<Collection, CollectionTypeParser>
 {
     private static final Map<Class<? extends Collection>, Supplier<Collection<?>>> SUPPORTED_TYPES = new HashMap<>();
@@ -39,6 +46,7 @@ public class CollectionTypeParser extends AbstractDefaultTypeParser<Collection, 
         return Collection.class;
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public boolean matches(final Class<?> type)
     {
@@ -62,7 +70,7 @@ public class CollectionTypeParser extends AbstractDefaultTypeParser<Collection, 
         return this.parse(argumentParser, new StringParserImpl(defaultValue.defaultValue()), defaultValue);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
     private Collection parse(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition def) throws ParsingException
     {
         final Class<?> collectionType = this.collectionType(def);

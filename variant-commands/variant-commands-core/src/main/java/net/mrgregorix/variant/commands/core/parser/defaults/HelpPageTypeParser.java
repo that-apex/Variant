@@ -2,16 +2,19 @@ package net.mrgregorix.variant.commands.core.parser.defaults;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.mrgregorix.variant.commands.api.message.HelpPage;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.core.message.HelpPageImpl;
 
+/**
+ * A {@link TypeParser} for {@link HelpPage} object
+ */
 public class HelpPageTypeParser extends AbstractDefaultTypeParser<HelpPage, HelpPageTypeParser>
 {
     private static final HelpPage     PAGE_ONE      = new HelpPageImpl(1);
@@ -20,21 +23,39 @@ public class HelpPageTypeParser extends AbstractDefaultTypeParser<HelpPage, Help
 
     private List<String> helpCommands;
 
+    /**
+     * Create a new HelpPageTypeParser with the default help command
+     */
     public HelpPageTypeParser()
     {
         this(HELP_COMMANDS);
     }
 
+    /**
+     * Create a new HelpPageTypeParser with the provided help commands
+     *
+     * @param helpCommands help commands to use
+     */
     public HelpPageTypeParser(final List<String> helpCommands)
     {
         this.helpCommands = helpCommands;
     }
 
+    /**
+     * Returns a list containing all help commands.
+     *
+     * @return a list containing all help commands
+     */
     public List<String> getHelpCommands()
     {
         return this.helpCommands;
     }
 
+    /**
+     * Sets the list containing all help commands.
+     *
+     * @param helpCommands list containing all help commands
+     */
     public void setHelpCommands(final List<String> helpCommands)
     {
         this.helpCommands = helpCommands;
@@ -47,7 +68,7 @@ public class HelpPageTypeParser extends AbstractDefaultTypeParser<HelpPage, Help
     }
 
     @Override
-    public HelpPage parseType(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition typeDefinition) throws ParsingException
+    public HelpPage parseType(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition typeDefinition)
     {
         final String help = parser.readUntil(' ');
 

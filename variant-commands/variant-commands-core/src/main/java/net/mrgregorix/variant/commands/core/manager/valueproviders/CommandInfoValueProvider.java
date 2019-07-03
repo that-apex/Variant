@@ -8,6 +8,9 @@ import net.mrgregorix.variant.commands.api.annotation.Info;
 import net.mrgregorix.variant.commands.api.manager.ValueProvider;
 import net.mrgregorix.variant.commands.api.parser.ParsingResult;
 
+/**
+ * A {@link ValueProvider} for {@link CommandInfo}
+ */
 public class CommandInfoValueProvider implements ValueProvider<Info>
 {
     @Override

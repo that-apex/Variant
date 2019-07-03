@@ -3,6 +3,9 @@ package net.mrgregorix.variant.commands.core.parser;
 import com.google.common.base.Preconditions;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 
+/**
+ * A simple implementation of {@link StringParser}
+ */
 public class StringParserImpl implements StringParser
 {
     private final String string;
@@ -14,7 +17,7 @@ public class StringParserImpl implements StringParser
     }
 
     @Override
-    public String getFullCommand()
+    public String getFullString()
     {
         return this.string;
     }

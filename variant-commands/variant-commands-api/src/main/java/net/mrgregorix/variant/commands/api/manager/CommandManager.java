@@ -50,9 +50,9 @@ public interface CommandManager
     void registerListener(CommandListener listener);
 
     /**
-     * Returns a collection of {@link CommandInfo}s of commands registerd to this manager.
+     * Returns a collection of {@link CommandInfo}s of commands registered to this manager.
      *
-     * @return a collection of registed {@link CommandInfo}s
+     * @return a collection of registered {@link CommandInfo}s
      */
     @CollectionMayBeImmutable
     Collection<? extends CommandInfo> getAllCommandInfos();

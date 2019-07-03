@@ -10,13 +10,24 @@ import java.util.TreeSet;
 import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.message.HelpPageInfo;
 
+/**
+ * Default implementation of the {@link HelpPageInfo}
+ */
 public class HelpPageInfoImpl implements HelpPageInfo
 {
     private final Collection<CommandInfo> commands;
-    private final int                               currentPage;
-    private final int                               pageSize;
-    private final String                            helpCommand;
+    private final int                     currentPage;
+    private final int                     pageSize;
+    private final String                  helpCommand;
 
+    /**
+     * Creates a new HelpPageInfoImpl
+     *
+     * @param commands    all the commands in the help
+     * @param currentPage the current page number
+     * @param pageSize    size of a single page
+     * @param helpCommand the command that is used to view the help page
+     */
     public HelpPageInfoImpl(final Collection<? extends CommandInfo> commands, final int currentPage, final int pageSize, final String helpCommand)
     {
         this.commands = new TreeSet<>(Comparator.comparing(CommandInfo::getFullPrefix));
@@ -75,6 +86,11 @@ public class HelpPageInfoImpl implements HelpPageInfo
         return this.helpCommand;
     }
 
+    /**
+     * Returns the collection of the {@link CommandInfo}s that are on this help page.
+     *
+     * @return the collection of the {@link CommandInfo}s that are on this help page
+     */
     public Collection<? extends CommandInfo> getInfos()
     {
         final List<CommandInfo> collection = new ArrayList<>();

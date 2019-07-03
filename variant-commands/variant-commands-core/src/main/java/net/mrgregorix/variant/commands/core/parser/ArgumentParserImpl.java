@@ -24,10 +24,16 @@ import net.mrgregorix.variant.commands.core.parser.result.ParsingResultImpl;
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
 import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 
+/**
+ * Basic implementation of {@link ArgumentParser}.
+ */
 public class ArgumentParserImpl implements ArgumentParser
 {
     private final CollectionWithImmutable<TypeParser<?, ?>, ImmutableList<TypeParser<?, ?>>> parsers = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
 
+    /**
+     * Creates a new ArgumentParserImpl with default {@link TypeParser}s registered
+     */
     public ArgumentParserImpl()
     {
         DefaultTypeParsers.register(this);

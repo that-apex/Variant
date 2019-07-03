@@ -1,7 +1,7 @@
 package net.mrgregorix.variant.commands.api.message;
 
 /**
- * Represents informations about a single help page.
+ * Represents information about a single help page.
  */
 public interface HelpPageInfo
 {

@@ -39,7 +39,7 @@ public class ArraySerializer implements TypeSerializer<Object>
 
     private Class<?> arrayType(final Class<?> type)
     {
-        return Array.newInstance(type, 0).getClass(); // todo maybe do it better, in the future xd
+        return Array.newInstance(type, 0).getClass();
     }
 
     @Override

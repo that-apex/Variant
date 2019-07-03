@@ -9,7 +9,7 @@ import net.mrgregorix.variant.commands.api.annotation.meta.ParameterDescription;
 import net.mrgregorix.variant.commands.api.parser.ParsingResult;
 
 /**
- * Provider for {@link ParameterDescription} annotation valuesl
+ * Provider for {@link ParameterDescription} annotation values
  *
  * @param <T> an annotation annotated with {@link ParameterDescription}
  */

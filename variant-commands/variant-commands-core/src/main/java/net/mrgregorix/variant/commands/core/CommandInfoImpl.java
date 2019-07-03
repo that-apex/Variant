@@ -5,6 +5,9 @@ import java.util.Collection;
 import net.mrgregorix.variant.commands.api.CommandInfo;
 import net.mrgregorix.variant.commands.api.annotation.Command;
 
+/**
+ * Basic implementation of a {@link CommandInfo}
+ */
 public class CommandInfoImpl implements CommandInfo
 {
     private final Command                           commandAnnotation;
@@ -12,6 +15,13 @@ public class CommandInfoImpl implements CommandInfo
     private final String                            fullPrefix;
     private       Collection<? extends CommandInfo> subcommands;
 
+    /**
+     * Creates a new CommandInfoImpl
+     *
+     * @param commandAnnotation the {@link Command} annotation containing the data about this command
+     * @param usage             usage of this command
+     * @param fullPrefix        the full prefix of this command (see {@link CommandInfo#getFullPrefix()})
+     */
     public CommandInfoImpl(final Command commandAnnotation, final String usage, final String fullPrefix)
     {
         this.commandAnnotation = commandAnnotation;

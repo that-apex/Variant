@@ -9,12 +9,18 @@ import net.mrgregorix.variant.commands.api.annotation.types.Radix;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.UseDefaultTypeException;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.RadixNotSupported;
 import net.mrgregorix.variant.commands.api.parser.exception.ValueSyntaxException;
 import net.mrgregorix.variant.commands.core.parser.defaults.PrimitiveTypeParser;
 
+/**
+ * A {@link TypeParser} parser for the numeric primitives
+ *
+ * @param <N> wrapper type of the numeric primitive
+ */
 public class NumberTypeParser <N extends Number> extends PrimitiveTypeParser<N>
 {
     private static final List<Character> ALLOWED_CHARACTERS_INTEGER        = Chars.asList("0123456789-".toCharArray());
@@ -55,7 +61,7 @@ public class NumberTypeParser <N extends Number> extends PrimitiveTypeParser<N>
         final StringBuilder stringValue = new StringBuilder();
         boolean allowPoint = this.isFloatingPoint;
 
-        while (!parser.isFinished() && (ALLOWED_CHARACTERS_INTEGER.contains(parser.peekCharacter()) || (allowPoint && ALLOWED_CHARACTERS_FLOATING_POINT.contains(parser.peekCharacter()))))
+        while (! parser.isFinished() && (ALLOWED_CHARACTERS_INTEGER.contains(parser.peekCharacter()) || (allowPoint && ALLOWED_CHARACTERS_FLOATING_POINT.contains(parser.peekCharacter()))))
         {
             if (ALLOWED_CHARACTERS_FLOATING_POINT.contains(parser.peekCharacter()))
             {

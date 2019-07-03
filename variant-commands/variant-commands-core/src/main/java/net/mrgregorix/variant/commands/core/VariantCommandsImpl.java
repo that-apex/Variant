@@ -13,6 +13,9 @@ import net.mrgregorix.variant.commands.core.message.DefaultHelpFormatter;
 import net.mrgregorix.variant.commands.core.message.HelpPageInfoImpl;
 import net.mrgregorix.variant.commands.core.parser.ArgumentParserImpl;
 
+/**
+ * Implementation of the Variant Command's module
+ */
 public class VariantCommandsImpl implements VariantCommands
 {
     public static final String MODULE_NAME = "Variant::Commands::Core";

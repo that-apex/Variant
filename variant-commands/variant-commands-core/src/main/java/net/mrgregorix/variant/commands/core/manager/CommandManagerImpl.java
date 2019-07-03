@@ -40,11 +40,17 @@ import net.mrgregorix.variant.commands.core.parser.definition.FlagTypeDefinition
 import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
 import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
 
+/**
+ * Implementation of {@link CommandManager}
+ */
 public class CommandManagerImpl implements CommandManager
 {
     private final CollectionWithImmutable<ValueProvider<?>, ImmutableList<ValueProvider<?>>> providers         = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
     private final List<RegisteredMethod>                                                     registeredMethods = new ArrayList<>();
 
+    /**
+     * Creates new CommandManagerImpl
+     */
     public CommandManagerImpl()
     {
         this.registerValueProvider(new SenderValueProvider());
@@ -148,7 +154,7 @@ public class CommandManagerImpl implements CommandManager
                 {
                     if (parameterDescription != null)
                     {
-                        throw new IllegalArgumentException("Parmeter " + i + ": " + parameter + " has multiple value providers");
+                        throw new IllegalArgumentException("Parameter " + i + ": " + parameter + " has multiple value providers");
                     }
 
                     parameterDescription = declaredAnnotation;
@@ -157,7 +163,7 @@ public class CommandManagerImpl implements CommandManager
                 final ForType forType = declaredAnnotation.annotationType().getAnnotation(ForType.class);
                 if (forType != null)
                 {
-                    if (!forType.value().isAssignableFrom(parameter.getType()))
+                    if (! forType.value().isAssignableFrom(parameter.getType()))
                     {
                         throw new ForTypeMismatchException(parameter + " must be of type " + forType.value());
                     }
@@ -320,7 +326,7 @@ public class CommandManagerImpl implements CommandManager
         }
         catch (final InvocationTargetException e)
         {
-            throw new RuntimeException("An exception occurred wihle executing command " + commandString, e.getTargetException());
+            throw new RuntimeException("An exception occurred while executing command " + commandString, e.getTargetException());
         }
     }
 }

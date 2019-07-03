@@ -3,10 +3,14 @@ package net.mrgregorix.variant.commands.core.parser.defaults.primitive;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.ValueSyntaxException;
 import net.mrgregorix.variant.commands.core.parser.defaults.PrimitiveTypeParser;
 
+/**
+ * A {@link TypeParser} parser for the {@code char} primitive
+ */
 public class CharacterTypeParser extends PrimitiveTypeParser<Character>
 {
     public CharacterTypeParser()

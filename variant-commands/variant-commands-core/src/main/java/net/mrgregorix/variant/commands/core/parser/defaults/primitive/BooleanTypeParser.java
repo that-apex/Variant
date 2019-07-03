@@ -6,11 +6,15 @@ import java.util.List;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
 import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
+import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.UseDefaultTypeException;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.ValueSyntaxException;
 import net.mrgregorix.variant.commands.core.parser.defaults.PrimitiveTypeParser;
 
+/**
+ * {@link TypeParser} parser for the {@code boolean} primitive
+ */
 public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
 {
     private static final List<String> TRUE_VALUES  = Arrays.asList("true", "yes", "y", "1");
@@ -19,11 +23,20 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
     private List<String> trueValues;
     private List<String> falseValues;
 
+    /**
+     * Constructs a simple BooleanTypeParser with predefined values
+     */
     public BooleanTypeParser()
     {
         this(TRUE_VALUES, FALSE_VALUES);
     }
 
+    /**
+     * Constructs a BooleanTypeParser with the given values.
+     *
+     * @param trueValues  values to be interpreted as {@code true}
+     * @param falseValues values to be interpreted as {@code false}
+     */
     public BooleanTypeParser(final List<String> trueValues, final List<String> falseValues)
     {
         super(Boolean.class, boolean.class);
@@ -31,21 +44,41 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
         this.falseValues = falseValues;
     }
 
+    /**
+     * Returns the values that are interpreted as a {@code true}.
+     *
+     * @return the values that are interpreted as a {@code true}
+     */
     public List<String> getTrueValues()
     {
         return this.trueValues;
     }
 
+    /**
+     * Returns the values that are interpreted as a {@code false}.
+     *
+     * @return the values that are interpreted as a {@code false}
+     */
     public List<String> getFalseValues()
     {
         return this.falseValues;
     }
 
+    /**
+     * Sets the values that are interpreted as a {@code true}.
+     *
+     * @param trueValues the values that are interpreted as a {@code true}
+     */
     public void setTrueValues(final List<String> trueValues)
     {
         this.trueValues = trueValues;
     }
 
+    /**
+     * Sets the values that are interpreted as a {@code false}.
+     *
+     * @param falseValues the values that are interpreted as a {@code false}
+     */
     public void setFalseValues(final List<String> falseValues)
     {
         this.falseValues = falseValues;

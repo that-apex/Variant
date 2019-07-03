@@ -17,6 +17,7 @@ public @interface Radix
 {
     /**
      * Returns the radix.
+     *
      * @return the radix
      */
     int value();

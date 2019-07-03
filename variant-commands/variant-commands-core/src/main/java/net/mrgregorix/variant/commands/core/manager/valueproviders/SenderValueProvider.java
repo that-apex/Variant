@@ -8,6 +8,9 @@ import net.mrgregorix.variant.commands.api.annotation.Sender;
 import net.mrgregorix.variant.commands.api.manager.ValueProvider;
 import net.mrgregorix.variant.commands.api.parser.ParsingResult;
 
+/**
+ * A {@link ValueProvider} for {@link CommandSender}
+ */
 public class SenderValueProvider implements ValueProvider<Sender>
 {
     @Override
@@ -19,7 +22,7 @@ public class SenderValueProvider implements ValueProvider<Sender>
     @Override
     public void validate(final Parameter parameter, final Sender annotation)
     {
-        if (!CommandSender.class.isAssignableFrom(parameter.getType()))
+        if (! CommandSender.class.isAssignableFrom(parameter.getType()))
         {
             throw new IllegalArgumentException(parameter + " must be a subclass of CommandSender");
         }
