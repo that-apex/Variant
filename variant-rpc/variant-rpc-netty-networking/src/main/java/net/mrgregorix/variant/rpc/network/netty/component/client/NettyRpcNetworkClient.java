@@ -13,8 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.google.common.cache.Cache;
@@ -25,6 +28,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkClient;
 import net.mrgregorix.variant.rpc.api.network.exception.CallTimeoutException;
+import net.mrgregorix.variant.rpc.api.network.exception.ConnectionFailureException;
 import net.mrgregorix.variant.rpc.api.network.provider.result.FailedRpcCallResult;
 import net.mrgregorix.variant.rpc.api.network.provider.result.RpcServiceCallResult;
 import net.mrgregorix.variant.rpc.api.serialize.DataSerializer;
@@ -45,13 +49,16 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
 {
     private static final long MISSED_RESULTS_REFRESH_TIME = TimeUnit.SECONDS.toMillis(1);
 
-    private final AtomicInteger                        callId      = new AtomicInteger(0);
-    private final ReadWriteLock                        resultsLock = new ReentrantReadWriteLock();
+    private final AtomicInteger                        callId        = new AtomicInteger(0);
+    private final AtomicBoolean                        connectingNow = new AtomicBoolean();
+    private final ReadWriteLock                        resultsLock   = new ReentrantReadWriteLock();
+    private final Lock                                 channelLock   = new ReentrantLock();
     private final long                                 timeout;
     private final Cache<Integer, RpcServiceCallResult> results;
     private final List<Class<? extends RpcService>>    services;
     private final DataSerializer                       dataSerializer;
     private final Executor                             waitingExecutor;
+    private       Throwable                            connectionError;
     private       EventLoopGroup                       workerGroup;
     private       Channel                              channel;
     private       Method[]                             methodIds;
@@ -79,7 +86,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
     @Override
     public boolean isRunning()
     {
-        return this.channel.isOpen();
+        return this.channel.isActive();
     }
 
     @Override
@@ -91,7 +98,14 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
     @Override
     public void startBlocking()
     {
-        this.doStart().syncUninterruptibly();
+        try
+        {
+            this.doStart().syncUninterruptibly();
+        }
+        catch (final Exception e)
+        {
+            throw new ConnectionFailureException("Connect failed", e);
+        }
 
         while (this.dataSerializer.isPersistent() && this.methodIds == null)
         {
@@ -111,18 +125,72 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
 
     private ChannelFuture doStart()
     {
-        this.workerGroup = this.getConfigurationFactory().createWorkerGroup();
+        this.channelLock.lock();
+        try
+        {
+            if (this.channel != null)
+            {
+                if (this.channel.isActive())
+                {
+                    throw new IllegalStateException("Already started");
+                }
 
-        final ChannelFuture future = new Bootstrap()
-            .group(this.workerGroup)
-            .handler(new NettyClientChannelInitializer(this))
-            .channel(this.getConfigurationFactory().getClientChannel())
-            .connect(this.getAddress(), this.getPort());
+                if (this.channel.isOpen())
+                {
+                    this.channel.close();
+                }
+            }
 
-        this.channel = future.channel();
-        future.addListener(f -> this.channel.writeAndFlush(new InitPacket(this.services, Collections.emptyList(), new HashMap<>(), this.dataSerializer.isPersistent()))); // todo data
+            if (this.workerGroup == null)
+            {
+                this.workerGroup = this.getConfigurationFactory().createWorkerGroup();
+            }
 
-        return future;
+            this.connectingNow.set(true);
+
+            final ChannelFuture future = new Bootstrap()
+                .group(this.workerGroup)
+                .handler(new NettyClientChannelInitializer(this))
+                .channel(this.getConfigurationFactory().getClientChannel())
+                .connect(this.getAddress(), this.getPort());
+
+            this.channel = future.channel();
+            future.addListener(f -> {
+                if (f.isSuccess())
+                {
+                    this.channel.writeAndFlush(new InitPacket(this.services, Collections.emptyList(), new HashMap<>(), this.dataSerializer.isPersistent())); // todo data
+
+                    if (! this.dataSerializer.isPersistent())
+                    {
+                        this.connectingNow.set(false);
+                    }
+                }
+                else
+                {
+                    this.connectionError = f.cause();
+                    this.connectingNow.set(false);
+                }
+
+                synchronized (this)
+                {
+                    this.notifyAll();
+                }
+            });
+
+            final Channel currentChannel = this.channel;
+            currentChannel.closeFuture().addListener(f -> {
+                if (this.channel == currentChannel)
+                {
+                    this.connectingNow.set(false);
+                }
+            });
+
+            return future;
+        }
+        finally
+        {
+            this.channelLock.unlock();
+        }
     }
 
     @Override
@@ -156,7 +224,78 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
     @Override
     public CompletableFuture<RpcServiceCallResult> call(final Class<? extends RpcService> service, final Method method, final Object[] arguments)
     {
-        // todo: reconnecting
+        return CompletableFuture.supplyAsync(() -> {
+            try
+            {
+                this.ensureConnectivity();
+            }
+            catch (final Exception e)
+            {
+                return new FailedRpcCallResult(FailedRpcCallResult.CONNECTION_NOT_ATTEMPTED, e);
+            }
+
+            return this.doCall0(service, method, arguments);
+        }, this.waitingExecutor);
+    }
+
+    private void ensureConnectivity()
+    {
+        this.channelLock.lock();
+
+        try
+        {
+            boolean wasConnecting = this.waitIfConnecting();
+
+            if (this.channel == null || ! this.channel.isActive())
+            {
+                if (wasConnecting)
+                {
+                    throw new ConnectionFailureException("Connection failed", this.connectionError);
+                }
+
+                try
+                {
+                    this.doStart().syncUninterruptibly();
+                    this.waitIfConnecting();
+                }
+                catch (final Exception e)
+                {
+                    throw new ConnectionFailureException("Connection failed", e);
+                }
+            }
+        }
+        finally
+        {
+            this.channelLock.unlock();
+        }
+    }
+
+    private boolean waitIfConnecting()
+    {
+        boolean wasConnecting = false;
+
+        while (this.connectingNow.get())
+        {
+            wasConnecting = true;
+
+            synchronized (this)
+            {
+                try
+                {
+                    this.wait(1000L);
+                }
+                catch (final InterruptedException e)
+                {
+                    throw new RuntimeException("Interrupted", e);
+                }
+            }
+        }
+
+        return wasConnecting;
+    }
+
+    private RpcServiceCallResult doCall0(final Class<? extends RpcService> service, final Method method, final Object[] arguments)
+    {
         final int callId = this.callId.incrementAndGet();
 
         // prepare arguments
@@ -178,7 +317,6 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
 
         if (this.dataSerializer.isPersistent())
         {
-
             int methodId = - 1;
             for (int i = 0; i < this.methodIds.length; i++)
             {
@@ -217,44 +355,42 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
         }
 
         // wait for response
-        return CompletableFuture.supplyAsync(() -> {
-            final long requested = System.currentTimeMillis();
+        final long requested = System.currentTimeMillis();
 
-            while (true)
+        while (true)
+        {
+            this.resultsLock.readLock().lock();
+            try
             {
-                this.resultsLock.readLock().lock();
-                try
-                {
-                    final RpcServiceCallResult result = this.results.getIfPresent(callId);
+                final RpcServiceCallResult result = this.results.getIfPresent(callId);
 
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                }
-                finally
+                if (result != null)
                 {
-                    this.resultsLock.readLock().unlock();
-                }
-
-                if (System.currentTimeMillis() > requested + this.timeout)
-                {
-                    return new FailedRpcCallResult(callId, new CallTimeoutException("Timeout when calling the method: " + method));
-                }
-
-                try
-                {
-                    synchronized (this)
-                    {
-                        this.wait(MISSED_RESULTS_REFRESH_TIME);
-                    }
-                }
-                catch (final InterruptedException e)
-                {
-                    throw new RuntimeException("Interrupted", e);
+                    return result;
                 }
             }
-        }, this.waitingExecutor);
+            finally
+            {
+                this.resultsLock.readLock().unlock();
+            }
+
+            if (System.currentTimeMillis() > requested + this.timeout)
+            {
+                return new FailedRpcCallResult(callId, new CallTimeoutException("Timeout when calling the method: " + method));
+            }
+
+            try
+            {
+                synchronized (this)
+                {
+                    this.wait(MISSED_RESULTS_REFRESH_TIME);
+                }
+            }
+            catch (final InterruptedException e)
+            {
+                throw new RuntimeException("Interrupted", e);
+            }
+        }
     }
 
     @Override
@@ -306,6 +442,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
     public void setMethodIds(final Method[] methodIds)
     {
         this.methodIds = methodIds;
+        this.connectingNow.set(false);
 
         synchronized (this)
         {

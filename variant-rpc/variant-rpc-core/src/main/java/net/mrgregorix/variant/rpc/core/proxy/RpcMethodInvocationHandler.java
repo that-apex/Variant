@@ -7,6 +7,8 @@ import net.mrgregorix.variant.api.proxy.Proxy;
 import net.mrgregorix.variant.api.proxy.ProxyInvocationHandler;
 import net.mrgregorix.variant.rpc.api.VariantRpc;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkClient;
+import net.mrgregorix.variant.rpc.api.network.exception.ConnectionFailureException;
+import net.mrgregorix.variant.rpc.api.network.provider.result.FailedRpcCallResult;
 import net.mrgregorix.variant.rpc.api.network.provider.result.RpcServiceCallResult;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
 import net.mrgregorix.variant.utils.exception.ExceptionUtils;
@@ -60,19 +62,32 @@ public class RpcMethodInvocationHandler extends AbstractModifiablePrioritizable<
 
         if (! result.wasSuccessful())
         {
-            final Exception exception = result.getException();
-
+            Exception exception = result.getException();
             StackTraceElement[] localStackTrace = Thread.currentThread().getStackTrace();
+            StackTraceElement[] remoteStackTrace = exception.getStackTrace();
 
             if (! ExceptionUtils.preferRealExceptions())
             {
                 localStackTrace = ExceptionUtils.getCallsUntilMarker(localStackTrace);
             }
-            localStackTrace[0] = new StackTraceElement(" ---- REMOTE", "SERVER: " + client.getName() + " ---- ", client.getAddress(), client.getPort());
 
-            StackTraceElement[] remoteStackTrace = exception.getStackTrace();
-
-            exception.setStackTrace(ExceptionUtils.appendStacktrace(remoteStackTrace, localStackTrace, 0));
+            if (result.getCallId() != FailedRpcCallResult.CONNECTION_NOT_ATTEMPTED)
+            {
+                localStackTrace[0] = new StackTraceElement(" ---- REMOTE", "SERVER: " + client.getName() + " ---- ", client.getAddress(), client.getPort());
+                exception.setStackTrace(ExceptionUtils.appendStacktrace(remoteStackTrace, localStackTrace, 0));
+            }
+            else
+            {
+                if (exception instanceof ConnectionFailureException)
+                {
+                    exception = new ConnectionFailureException(exception.getMessage(), exception);
+                    exception.setStackTrace(ExceptionUtils.appendStacktrace(new StackTraceElement[0], localStackTrace, 1));
+                }
+                else
+                {
+                    exception.setStackTrace(ExceptionUtils.appendStacktrace(remoteStackTrace, localStackTrace, 1));
+                }
+            }
 
             throw exception;
         }

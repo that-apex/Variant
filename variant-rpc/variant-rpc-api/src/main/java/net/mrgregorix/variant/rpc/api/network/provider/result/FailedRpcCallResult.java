@@ -9,8 +9,9 @@ import net.mrgregorix.variant.utils.annotation.Nullable;
  */
 public class FailedRpcCallResult implements RpcServiceCallResult
 {
-    private final int       callId;
-    private final Exception exception;
+    public static final int       CONNECTION_NOT_ATTEMPTED = - 1;
+    private final       int       callId;
+    private final       Exception exception;
 
     /**
      * Creates a new FailedRpcCallResult
