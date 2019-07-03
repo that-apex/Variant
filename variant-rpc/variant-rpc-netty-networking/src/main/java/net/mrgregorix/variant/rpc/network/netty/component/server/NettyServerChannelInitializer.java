@@ -24,6 +24,8 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel>
     @Override
     protected void initChannel(final Channel ch) throws Exception
     {
+        this.server.addChannel(ch);
+
         ch.pipeline().addLast("VariantRpc|PacketMessageHandler", new PacketMessageHandler());
         ch.pipeline().addLast("VariantRpc|IncomingServerPacketHandler", new IncomingServerPacketHandler(this.server));
     }

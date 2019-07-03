@@ -8,6 +8,9 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkServer;
 import net.mrgregorix.variant.rpc.api.network.provider.RpcServerHandler;
 import net.mrgregorix.variant.rpc.api.serialize.DataSerializer;
@@ -28,6 +31,7 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
     private final Collection<Class<? extends RpcService>> supportedServices;
     private final DataSerializer                          persistentDataSerializer;
     private final DataSerializer                          nonPersistentDataSerializer;
+    private       ChannelGroup                            channelGroup;
     private       Channel                                 serverChannel;
     private       EventLoopGroup                          bossGroup;
     private       EventLoopGroup                          workerGroup;
@@ -74,8 +78,13 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
 
     private ChannelFuture doStart()
     {
-        this.bossGroup = this.getConfigurationFactory().createBossGroup();
-        this.workerGroup = this.getConfigurationFactory().createWorkerGroup();
+        if (this.bossGroup == null || this.workerGroup == null)
+        {
+            this.bossGroup = this.getConfigurationFactory().createBossGroup();
+            this.workerGroup = this.getConfigurationFactory().createWorkerGroup();
+        }
+
+        this.channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
         final ChannelFuture future = new ServerBootstrap()
             .group(this.bossGroup, this.workerGroup)
@@ -92,12 +101,22 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
     public void stop()
     {
         this.serverChannel.close();
+        this.channelGroup.close();
+        this.cleanGroup();
     }
 
     @Override
     public void stopBlocking()
     {
-        this.serverChannel.close().syncUninterruptibly();
+        this.serverChannel.close().awaitUninterruptibly();
+        this.channelGroup.close().awaitUninterruptibly();
+        this.cleanGroup();
+    }
+
+    private void cleanGroup()
+    {
+        this.channelGroup.clear();
+        this.channelGroup = null;
     }
 
     @Override
@@ -106,15 +125,15 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
         return CompletableFuture.runAsync(() -> {
             if (this.serverChannel != null && this.serverChannel.isOpen())
             {
-                this.serverChannel.close().syncUninterruptibly();
+                this.stopBlocking();
             }
             if (this.bossGroup != null)
             {
                 final io.netty.util.concurrent.Future<?> bossShutdown = this.bossGroup.shutdownGracefully();
                 final io.netty.util.concurrent.Future<?> workerShutdown = this.workerGroup.shutdownGracefully();
 
-                bossShutdown.syncUninterruptibly();
-                workerShutdown.syncUninterruptibly();
+                bossShutdown.awaitUninterruptibly();
+                workerShutdown.awaitUninterruptibly();
             }
         });
     }
@@ -157,5 +176,15 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
     public RpcServerHandler getHandler()
     {
         return this.handler;
+    }
+
+    /**
+     * Adds client channel to this server's {@link ChannelGroup}
+     *
+     * @param channel channel to add
+     */
+    public void addChannel(final Channel channel)
+    {
+        this.channelGroup.add(channel);
     }
 }
