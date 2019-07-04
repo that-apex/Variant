@@ -1,18 +1,16 @@
 package net.mrgregorix.variant.commands.api.parser;
 
-import java.util.Collection;
-
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
-import net.mrgregorix.variant.utils.annotation.CollectionMayBeImmutable;
+import net.mrgregorix.variant.utils.registry.Registry;
 
 public interface ArgumentParser
 {
-    @CollectionMayBeImmutable
-    Collection<TypeParser<?, ?>> getTypeParsers();
-
-    boolean registerTypeParser(TypeParser<?, ?> parser);
-
-    boolean unregisterTypeParser(TypeParser<?, ?> parser);
+    /**
+     * Returns a {@link Registry} containing argument parsers.
+     *
+     * @return a {@link Registry} containing argument parsers
+     */
+    Registry<TypeParser<?, ?>> getTypeParserRegistry();
 
     /**
      * Gets parser that is able to parse the given type

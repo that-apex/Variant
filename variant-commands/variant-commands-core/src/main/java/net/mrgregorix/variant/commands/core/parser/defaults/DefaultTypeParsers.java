@@ -38,6 +38,6 @@ public class DefaultTypeParsers
      */
     public static void register(final ArgumentParser argumentParser)
     {
-        PARSERS.forEach(argumentParser::registerTypeParser);
+        PARSERS.forEach(argumentParser.getTypeParserRegistry()::register);
     }
 }

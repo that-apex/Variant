@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableList;
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.ParsingResult;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
@@ -21,15 +20,15 @@ import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.TooManyParametersException;
 import net.mrgregorix.variant.commands.core.parser.defaults.DefaultTypeParsers;
 import net.mrgregorix.variant.commands.core.parser.result.ParsingResultImpl;
-import net.mrgregorix.variant.utils.collections.immutable.CollectionWithImmutable;
-import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithImmutable;
+import net.mrgregorix.variant.utils.registry.CollectionWithImmutableBackedRegistry;
+import net.mrgregorix.variant.utils.registry.Registry;
 
 /**
  * Basic implementation of {@link ArgumentParser}.
  */
 public class ArgumentParserImpl implements ArgumentParser
 {
-    private final CollectionWithImmutable<TypeParser<?, ?>, ImmutableList<TypeParser<?, ?>>> parsers = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
+    private final Registry<TypeParser<?, ?>> typeParserRegistry = CollectionWithImmutableBackedRegistry.withImmutableList(new ArrayList<>());
 
     /**
      * Creates a new ArgumentParserImpl with default {@link TypeParser}s registered
@@ -40,33 +39,21 @@ public class ArgumentParserImpl implements ArgumentParser
     }
 
     @Override
-    public Collection<TypeParser<?, ?>> getTypeParsers()
+    public Registry<TypeParser<?, ?>> getTypeParserRegistry()
     {
-        return this.parsers.getImmutable();
-    }
-
-    @Override
-    public boolean registerTypeParser(final TypeParser<?, ?> parser)
-    {
-        return this.parsers.add(parser);
-    }
-
-    @Override
-    public boolean unregisterTypeParser(final TypeParser<?, ?> parser)
-    {
-        return this.parsers.remove(parser);
+        return this.typeParserRegistry;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeParser<T, ?> getParserFor(final Class<T> type)
     {
-        return this.parsers
-            .stream()
-            .filter(it -> it.matches(type))
-            .map(parser -> (TypeParser<T, ?>) parser)
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("No parser found for type " + type));
+        return this.typeParserRegistry.getRegisteredObjects()
+                                      .stream()
+                                      .filter(it -> it.matches(type))
+                                      .map(parser -> (TypeParser<T, ?>) parser)
+                                      .findAny()
+                                      .orElseThrow(() -> new IllegalArgumentException("No parser found for type " + type));
     }
 
     @Override
