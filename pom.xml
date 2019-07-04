@@ -16,6 +16,7 @@
         <module>variant-inject</module>
         <module>variant-scanner</module>
         <module>variant-rpc</module>
+        <module>variant-commands</module>
     </modules>
 
     <name>Variant - Parent</name>
@@ -137,6 +138,21 @@
             <dependency>
                 <groupId>net.mrgregorix.variant</groupId>
                 <artifactId>variant-rpc-tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-commands-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.mrgregorix.variant</groupId>
+                <artifactId>variant-commands-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
