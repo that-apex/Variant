@@ -38,4 +38,10 @@ public class CollectionBackedRegistry <T> implements Registry<T>
     {
         return this.backingCollection.remove(object);
     }
+
+    @Override
+    public void unregisterAll()
+    {
+        this.backingCollection.clear();
+    }
 }

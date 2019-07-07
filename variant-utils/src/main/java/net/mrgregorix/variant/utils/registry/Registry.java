@@ -36,4 +36,9 @@ public interface Registry <T>
      * @return true if the object was unregistered successfully
      */
     boolean unregister(T object);
+
+    /**
+     * Unregisters all objects from this registry
+     */
+    void unregisterAll();
 }
