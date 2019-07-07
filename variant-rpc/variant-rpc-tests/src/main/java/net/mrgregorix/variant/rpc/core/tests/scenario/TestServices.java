@@ -1,5 +1,10 @@
 package net.mrgregorix.variant.rpc.core.tests.scenario;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -8,9 +13,14 @@ import java.util.Random;
 import net.mrgregorix.variant.rpc.api.VariantRpc;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkClient;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkServer;
+import net.mrgregorix.variant.rpc.api.network.authenticator.RpcAuthenticator;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
 import net.mrgregorix.variant.rpc.api.service.ServiceImplementationDetail;
+import net.mrgregorix.variant.rpc.core.authenticator.IpAuthentication;
+import net.mrgregorix.variant.rpc.core.authenticator.publickey.RsaPublicKeyAuthentication;
 import net.mrgregorix.variant.rpc.core.tests.custom.DateSerializer;
+import net.mrgregorix.variant.utils.annotation.Nullable;
+import org.junit.jupiter.api.Assertions;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -68,6 +78,88 @@ public class TestServices
         finally
         {
             variantRpc.disposeAll();
+        }
+    }
+
+    public static void testReconnecting(final VariantRpc rpc, final int port)
+    {
+        final RpcNetworkServer server = rpc.setupServer("test-server", "127.0.0.1", port, Collections.singletonList(new ServiceImplementationDetail<>(SimpleRpcService.class, new SimpleRpcServiceImpl())));
+        final RpcNetworkClient client = rpc.setupClient("test-client", "127.0.0.1", port, Collections.singletonList(SimpleRpcService.class), true);
+
+        try
+        {
+            testAuthenticator0(server, client, IpAuthentication.withBlacklist(Collections.singleton("127.0.0.1")), null, false, port);
+            testAuthenticator0(server, client, IpAuthentication.withBlacklist(Collections.singleton("187.0.0.1")), null, true, port);
+            testAuthenticator0(server, client, IpAuthentication.withWhitelist(Collections.singleton("127.0.0.1")), null, true, port);
+            testAuthenticator0(server, client, IpAuthentication.withWhitelist(Collections.singleton("187.0.0.1")), null, false, port);
+
+            testAuthenticator0(server, client, new CustomAuthenticator(), new CustomAuthenticator(), true, 2736);
+
+            {
+                final KeyPairGenerator generator;
+                try
+                {
+                    generator = KeyPairGenerator.getInstance("RSA");
+                    generator.initialize(1024);
+                    final KeyPair keyPair = generator.genKeyPair();
+                    final RsaPublicKeyAuthentication serverAuthenticator = new RsaPublicKeyAuthentication((RSAPublicKey) keyPair.getPublic());
+                    final RsaPublicKeyAuthentication clientAuthenticator = new RsaPublicKeyAuthentication((RSAPublicKey) keyPair.getPublic(), (RSAPrivateKey) keyPair.getPrivate());
+
+                    testAuthenticator0(server, client, serverAuthenticator, clientAuthenticator, true, 2736);
+                }
+                catch (final NoSuchAlgorithmException e)
+                {
+                    e.printStackTrace();
+                    // skip the test
+                }
+            }
+        }
+        finally
+        {
+            rpc.disposeAll();
+        }
+    }
+
+    public static void testAuthenticator0(final RpcNetworkServer server, final RpcNetworkClient client, final RpcAuthenticator serverAuthenticator, @Nullable final RpcAuthenticator clientAuthenticator, final boolean successExpected, final int port)
+    {
+        if (server.isRunning())
+        {
+            server.stopBlocking();
+        }
+
+        if (client.isRunning())
+        {
+            client.stopBlocking();
+        }
+
+        server.getAuthenticatorRegistry().unregisterAll();
+        client.getAuthenticatorRegistry().unregisterAll();
+
+        server.getAuthenticatorRegistry().register(serverAuthenticator);
+
+        if (clientAuthenticator != null)
+        {
+            client.getAuthenticatorRegistry().register(clientAuthenticator);
+        }
+
+        server.startBlocking();
+        client.startBlocking();
+
+        try
+        {
+            if (successExpected)
+            {
+                Assertions.assertTrue(client.isRunning(), "Authentication failed when it was supposed to succeed");
+            }
+            else
+            {
+                Assertions.assertFalse(client.isRunning(), "Authentication succeed when it was supposed failed ");
+            }
+        }
+        finally
+        {
+            server.stopBlocking();
+            client.stopBlocking();
         }
     }
 

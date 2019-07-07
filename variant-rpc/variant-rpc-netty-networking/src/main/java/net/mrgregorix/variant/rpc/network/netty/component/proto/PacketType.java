@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import com.google.common.base.Preconditions;
+import net.mrgregorix.variant.rpc.network.netty.component.proto.auth.AuthPacketDecoder;
+import net.mrgregorix.variant.rpc.network.netty.component.proto.auth.AuthPacketEncoder;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.callresult.CallResultPacketDecoder;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.callresult.CallResultPacketEncoder;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.connectionclose.ConnectionClosedPacketDecoder;
@@ -27,7 +29,8 @@ public enum PacketType
     PACKET_CONNECTION_CLOSE(2, new ConnectionClosedPacketEncoder(), new ConnectionClosedPacketDecoder()),
     PACKET_REQUEST_CALL_PERSISTENT(3, new PersistentCallRequestPacketEncoder(), new PersistentCallRequestPacketDecoder()),
     PACKET_REQUEST_CALL_NON_PERSISTENT(4, new NonPersistentCallRequestPacketEncoder(), new NonPersistentCallRequestPacketDecoder()),
-    PACKET_CALL_RESULT(5, new CallResultPacketEncoder(), new CallResultPacketDecoder());
+    PACKET_CALL_RESULT(5, new CallResultPacketEncoder(), new CallResultPacketDecoder()),
+    PACKET_AUTH(6, new AuthPacketEncoder(), new AuthPacketDecoder());
 
     private final byte             id;
     private final PacketEncoder<?> encoder;

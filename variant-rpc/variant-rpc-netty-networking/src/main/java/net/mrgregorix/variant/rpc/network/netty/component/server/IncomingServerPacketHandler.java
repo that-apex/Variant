@@ -10,14 +10,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.function.Function;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Attribute;
+import net.mrgregorix.variant.rpc.api.network.authenticator.RpcAuthenticator;
+import net.mrgregorix.variant.rpc.api.network.authenticator.result.AuthenticationResult;
+import net.mrgregorix.variant.rpc.api.network.authenticator.result.SuccessAuthenticationResult;
 import net.mrgregorix.variant.rpc.api.network.provider.result.RpcServiceCallResult;
 import net.mrgregorix.variant.rpc.api.serialize.DataSerializer;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.Packet;
+import net.mrgregorix.variant.rpc.network.netty.component.proto.auth.AuthPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.callresult.CallResultPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.init.InitPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.megapacket.MegaPacket;
@@ -50,6 +56,12 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
     {
         final Packet packet = (Packet) msg;
 
+        final Attribute<NettyRpcConnectionData> attribute = ctx.channel().attr(ChannelAttributes.CONNECTION_DATA);
+        if (attribute.get() != null && attribute.get().isDisconnected())
+        {
+            return;
+        }
+
         switch (packet.getPacketType())
         {
             case PACKET_INIT:
@@ -63,6 +75,11 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
                 this.handlePacket(ctx, (CallRequestPacket) packet);
                 break;
             }
+            case PACKET_AUTH:
+            {
+                this.handlePacket(ctx, (AuthPacket) packet);
+                break;
+            }
             default:
             {
                 final NettyRpcConnectionData data = ctx.channel().attr(ChannelAttributes.CONNECTION_DATA).get();
@@ -70,8 +87,6 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
                 {
                     data.disconnect("Invalid packet received: " + packet.getPacketType().getId());
                 }
-
-                ctx.channel().close();
 
                 break;
             }
@@ -89,10 +104,10 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
         }
 
         final DataSerializer serializer = (packet.isPersistent() ? this.server.getPersistentDataSerializer() : this.server.getNonPersistentDataSerializer()).makeClone();
-        attribute.set(new NettyRpcConnectionData(ctx.channel(), packet.getServices(), serializer));
+        attribute.set(new NettyRpcConnectionData(ctx.channel(), packet.getServices(), serializer, new ArrayList<>(this.server.getAuthenticatorRegistry().getRegisteredObjects())));
 
         final NettyRpcConnectionData data = attribute.get();
-        this.server.getHandler().newConnection(data, packet.getData());
+        this.server.getHandler().newConnection(data);
 
         if (data.isDisconnected())
         {
@@ -117,41 +132,9 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
         if (errorMessage.length() > 0)
         {
             data.disconnect("Failed to initialize the connection: " + errorMessage.toString());
-            return;
         }
 
-        if (data.getDataSerializer().isPersistent())
-        {
-            final Collection<Class<?>> types = new HashSet<>();
-            final Collection<Method> methodList = new ArrayList<>();
-
-            for (final Class<? extends RpcService> service : packet.getServices())
-            {
-                for (final Method method : MemberUtils.getAllMethods(service))
-                {
-                    if (method.getDeclaringClass() == RpcService.class)
-                    {
-                        continue;
-                    }
-
-                    methodList.add(method);
-                    if (method.getReturnType() != void.class)
-                    {
-                        types.add(method.getReturnType());
-                    }
-
-                    Collections.addAll(types, method.getParameterTypes());
-                    Collections.addAll(types, method.getExceptionTypes());
-                }
-            }
-
-            data.setMethodIds(methodList.toArray(new Method[0]));
-
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            this.server.getPersistentDataSerializer().produceMegaPacket(new DataOutputStream(stream), types);
-            data.getDataSerializer().initializeWithMegaPacket(new DataInputStream(new ByteArrayInputStream(stream.toByteArray())));
-            ctx.channel().writeAndFlush(new MegaPacket(data.getMethodIds(), stream.toByteArray()));
-        }
+        this.processAuth(ctx, data, rpcAuthenticator -> rpcAuthenticator.clientConnected(data));
     }
 
     private void handlePacket(final ChannelHandlerContext ctx, final CallRequestPacket packet)
@@ -162,6 +145,12 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
         {
             ctx.channel().close();
             throw new IllegalStateException("Uninitialized");
+        }
+
+        if (! connectionData.isAuthenticated())
+        {
+            connectionData.disconnect("Unauthenticated");
+            return;
         }
 
         final Method method;
@@ -221,5 +210,117 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
         ctx.channel().writeAndFlush(result.wasSuccessful() ?
                                     CallResultPacket.createSuccess(result.getCallId(), data.toByteArray()) :
                                     CallResultPacket.createFailure(result.getCallId(), data.toByteArray()));
+    }
+
+    private void handlePacket(final ChannelHandlerContext ctx, final AuthPacket packet) throws IOException
+    {
+        final NettyRpcConnectionData data = ctx.channel().attr(ChannelAttributes.CONNECTION_DATA).get();
+        final AuthenticationResult result = packet.getAuthenticationResult();
+
+        if (! result.hasData())
+        {
+            data.disconnect("Only data auth packets are allowed");
+            return;
+        }
+
+        final RpcAuthenticator authenticator = data.getRequiredAuthenticators().get(packet.getIssuerId());
+        final AuthenticationResult auth = authenticator.dataReceivedFromClient(data, new DataInputStream(new ByteArrayInputStream(result.getData())));
+
+        if (auth.isFailure())
+        {
+            data.disconnect("Authentication failure: " + auth.getFailReason());
+        }
+        else if (auth.hasData())
+        {
+            ctx.channel().writeAndFlush(new AuthPacket(auth, packet.getIssuerId()));
+        }
+        else if (auth.isSuccessful())
+        {
+            synchronized (data.getSuccessAuthenticators())
+            {
+                data.getSuccessAuthenticators().add(authenticator);
+            }
+
+            this.checkAuth(ctx, data);
+        }
+    }
+
+    private void processAuth(final ChannelHandlerContext ctx, final NettyRpcConnectionData data, final Function<RpcAuthenticator, AuthenticationResult> function) throws IOException
+    {
+        final List<RpcAuthenticator> requiredAuthenticators = data.getRequiredAuthenticators();
+
+        for (int i = 0, requiredAuthenticatorsSize = requiredAuthenticators.size(); i < requiredAuthenticatorsSize; i++)
+        {
+            final RpcAuthenticator authenticator = requiredAuthenticators.get(i);
+            final AuthenticationResult result = function.apply(authenticator);
+
+            if (result.isFailure())
+            {
+                data.disconnect("Authentication failure: " + result.getFailReason());
+                return;
+            }
+
+            if (result.hasData())
+            {
+                ctx.channel().writeAndFlush(new AuthPacket(result, i));
+            }
+
+            if (result.isSuccessful())
+            {
+                synchronized (data.getSuccessAuthenticators())
+                {
+                    data.getSuccessAuthenticators().add(authenticator);
+                }
+            }
+        }
+
+        this.checkAuth(ctx, data);
+    }
+
+    private synchronized void checkAuth(final ChannelHandlerContext ctx, final NettyRpcConnectionData data) throws IOException
+    {
+        synchronized (data.getSuccessAuthenticators())
+        {
+            if (! data.getSuccessAuthenticators().containsAll(data.getRequiredAuthenticators()))
+            {
+                return;
+            }
+        }
+
+        ctx.channel().writeAndFlush(new AuthPacket(new SuccessAuthenticationResult(), - 1));
+        data.setAuthenticated(true);
+
+        if (data.getDataSerializer().isPersistent())
+        {
+            final Collection<Class<?>> types = new HashSet<>();
+            final Collection<Method> methodList = new ArrayList<>();
+
+            for (final Class<? extends RpcService> service : data.getServices())
+            {
+                for (final Method method : MemberUtils.getAllMethods(service))
+                {
+                    if (method.getDeclaringClass() == RpcService.class)
+                    {
+                        continue;
+                    }
+
+                    methodList.add(method);
+                    if (method.getReturnType() != void.class)
+                    {
+                        types.add(method.getReturnType());
+                    }
+
+                    Collections.addAll(types, method.getParameterTypes());
+                    Collections.addAll(types, method.getExceptionTypes());
+                }
+            }
+
+            data.setMethodIds(methodList.toArray(new Method[0]));
+
+            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            this.server.getPersistentDataSerializer().produceMegaPacket(new DataOutputStream(stream), types);
+            data.getDataSerializer().initializeWithMegaPacket(new DataInputStream(new ByteArrayInputStream(stream.toByteArray())));
+            ctx.channel().writeAndFlush(new MegaPacket(data.getMethodIds(), stream.toByteArray()));
+        }
     }
 }

@@ -30,9 +30,8 @@ public class StandardServerHandler implements RpcServerHandler
     }
 
     @Override
-    public void newConnection(final RpcConnectionData data, final Map<String, byte[]> connectionData)
+    public void newConnection(final RpcConnectionData data)
     {
-        // TODO: Server attachments
     }
 
     @Override

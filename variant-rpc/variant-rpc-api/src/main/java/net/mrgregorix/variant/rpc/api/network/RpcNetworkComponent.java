@@ -1,5 +1,8 @@
 package net.mrgregorix.variant.rpc.api.network;
 
+import net.mrgregorix.variant.rpc.api.network.authenticator.RpcAuthenticator;
+import net.mrgregorix.variant.utils.registry.Registry;
+
 /**
  * Represents an RPC network component.
  * <p>
@@ -20,6 +23,13 @@ public interface RpcNetworkComponent
      * @return an address that this component uses
      */
     String getAddress();
+
+    /**
+     * Returns a {@link Registry} containing all {@link RpcAuthenticator}s regisered to this component.
+     *
+     * @return {@link Registry} containing all {@link RpcAuthenticator}s regisered to this component
+     */
+    Registry<RpcAuthenticator> getAuthenticatorRegistry();
 
     /**
      * Returns the port that this component uses

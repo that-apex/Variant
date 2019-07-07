@@ -1,7 +1,5 @@
 package net.mrgregorix.variant.rpc.network.netty.component.proto.init;
 
-import java.util.Map;
-
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
@@ -19,15 +17,6 @@ public class InitPacketEncoder implements PacketEncoder<InitPacket>
         for (final Class<? extends RpcService> service : packet.getServices())
         {
             BufferUtils.writeString(buf, service.getName());
-        }
-
-        final Map<String, byte[]> data = packet.getData();
-        buf.writeShort(data.size());
-        for (final Map.Entry<String, byte[]> entry : data.entrySet())
-        {
-            BufferUtils.writeString(buf, entry.getKey());
-            buf.writeShort(entry.getValue().length);
-            buf.writeBytes(entry.getValue());
         }
 
         buf.writeBoolean(packet.isPersistent());

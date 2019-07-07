@@ -1,7 +1,6 @@
 package net.mrgregorix.variant.rpc.api.network.provider;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import net.mrgregorix.variant.rpc.api.network.provider.result.RpcServiceCallResult;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
@@ -14,10 +13,9 @@ public interface RpcServerHandler
     /**
      * Called when a new client connects to the server
      *
-     * @param data           the new connection data
-     * @param connectionData additional data sent in the init packet
+     * @param data the new connection data
      */
-    void newConnection(RpcConnectionData data, Map<String, byte[]> connectionData);
+    void newConnection(RpcConnectionData data);
 
     /**
      * Called when a RPC call is requested.

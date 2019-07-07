@@ -61,7 +61,7 @@ public class NettyRpcNetworkServer extends AbstractNettyNetworkComponent impleme
     @Override
     public boolean isRunning()
     {
-        return this.serverChannel.isOpen();
+        return this.serverChannel != null && this.serverChannel.isOpen();
     }
 
     @Override

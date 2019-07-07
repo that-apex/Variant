@@ -1,8 +1,10 @@
 package net.mrgregorix.variant.rpc.api.network.provider;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkServer;
+import net.mrgregorix.variant.rpc.api.network.authenticator.RpcAuthenticator;
 import net.mrgregorix.variant.rpc.api.serialize.DataSerializer;
 
 /**
@@ -37,4 +39,11 @@ public interface RpcConnectionData
      * @return whether disconnect was called.
      */
     boolean isDisconnected();
+
+    /**
+     * Returns a map of additional properties of this connection. Commonly used by {@link RpcAuthenticator}s
+     *
+     * @return additional properties of this connection
+     */
+    Map<String, Object> getAuthData();
 }

@@ -1,6 +1,8 @@
 package net.mrgregorix.variant.rpc.network.netty.component.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -9,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -27,6 +30,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import net.mrgregorix.variant.rpc.api.network.RpcNetworkClient;
+import net.mrgregorix.variant.rpc.api.network.authenticator.RpcAuthenticator;
+import net.mrgregorix.variant.rpc.api.network.authenticator.result.DataAuthenticationResult;
+import net.mrgregorix.variant.rpc.api.network.exception.AuthenticationFailureException;
 import net.mrgregorix.variant.rpc.api.network.exception.CallTimeoutException;
 import net.mrgregorix.variant.rpc.api.network.exception.ConnectionFailureException;
 import net.mrgregorix.variant.rpc.api.network.provider.result.FailedRpcCallResult;
@@ -35,6 +41,7 @@ import net.mrgregorix.variant.rpc.api.serialize.DataSerializer;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
 import net.mrgregorix.variant.rpc.network.netty.NettyRpcNetworkingProvider;
 import net.mrgregorix.variant.rpc.network.netty.component.AbstractNettyNetworkComponent;
+import net.mrgregorix.variant.rpc.network.netty.component.proto.auth.AuthPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.init.InitPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.nonpersistent.NonPersistentCallRequestPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.persistent.PersistentCallRequestPacket;
@@ -49,10 +56,11 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
 {
     private static final long MISSED_RESULTS_REFRESH_TIME = TimeUnit.SECONDS.toMillis(1);
 
-    private final AtomicInteger                        callId        = new AtomicInteger(0);
-    private final AtomicBoolean                        connectingNow = new AtomicBoolean();
-    private final ReadWriteLock                        resultsLock   = new ReentrantReadWriteLock();
-    private final Lock                                 channelLock   = new ReentrantLock();
+    private final AtomicInteger                        callId             = new AtomicInteger(0);
+    private final AtomicBoolean                        connectingNow      = new AtomicBoolean();
+    private final ReadWriteLock                        resultsLock        = new ReentrantReadWriteLock();
+    private final Lock                                 channelLock        = new ReentrantLock();
+    private final Map<Integer, RpcAuthenticator>       authenticatorCache = new HashMap<>();
     private final long                                 timeout;
     private final Cache<Integer, RpcServiceCallResult> results;
     private final List<Class<? extends RpcService>>    services;
@@ -86,7 +94,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
     @Override
     public boolean isRunning()
     {
-        return this.channel.isActive();
+        return this.channel != null && this.channel.isActive();
     }
 
     @Override
@@ -107,7 +115,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
             throw new ConnectionFailureException("Connect failed", e);
         }
 
-        while (this.dataSerializer.isPersistent() && this.methodIds == null)
+        while (this.connectingNow.get())
         {
             synchronized (this)
             {
@@ -141,6 +149,9 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                 }
             }
 
+            this.results.invalidateAll();
+            this.authenticatorCache.clear();
+
             if (this.workerGroup == null)
             {
                 this.workerGroup = this.getConfigurationFactory().createWorkerGroup();
@@ -158,12 +169,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
             future.addListener(f -> {
                 if (f.isSuccess())
                 {
-                    this.channel.writeAndFlush(new InitPacket(this.services, Collections.emptyList(), new HashMap<>(), this.dataSerializer.isPersistent())); // todo data
-
-                    if (! this.dataSerializer.isPersistent())
-                    {
-                        this.connectingNow.set(false);
-                    }
+                    this.channel.writeAndFlush(new InitPacket(this.services, Collections.emptyList(), this.dataSerializer.isPersistent()));
                 }
                 else
                 {
@@ -182,6 +188,11 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
                 if (this.channel == currentChannel)
                 {
                     this.connectingNow.set(false);
+
+                    synchronized (this)
+                    {
+                        this.notifyAll();
+                    }
                 }
             });
 
@@ -448,5 +459,61 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
         {
             this.notifyAll();
         }
+    }
+
+    /**
+     * Notifies the client that authentication was successful
+     */
+    public void authenticated()
+    {
+        if (! this.dataSerializer.isPersistent())
+        {
+            this.connectingNow.set(false);
+        }
+
+        synchronized (this)
+        {
+            this.notifyAll();
+        }
+    }
+
+    /**
+     * Handles authentication data
+     *
+     * @param issuerId id of the issuer (sender) of the data
+     * @param data     received data
+     *
+     * @throws IOException when an IOException occurs
+     */
+    public synchronized void authDataReceived(final int issuerId, final byte[] data) throws IOException
+    {
+        if (! this.authenticatorCache.containsKey(issuerId))
+        {
+            for (final RpcAuthenticator authenticator : this.getAuthenticatorRegistry().getRegisteredObjects())
+            {
+                final DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
+
+                if (authenticator.matchDataReceivedFromServer(stream))
+                {
+                    this.authenticatorCache.put(issuerId, authenticator);
+
+                    if (stream.available() > 0)
+                    {
+                        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+                        this.authenticatorCache.get(issuerId).dataReceivedFromServer(stream, new DataOutputStream(output));
+                        this.channel.writeAndFlush(new AuthPacket(new DataAuthenticationResult(output.toByteArray()), issuerId));
+                    }
+
+                    return;
+                }
+            }
+
+            this.stopBlocking();
+            throw new AuthenticationFailureException("No authenticator found to handle the auth message");
+        }
+
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        this.authenticatorCache.get(issuerId).dataReceivedFromServer(new DataInputStream(new ByteArrayInputStream(data)), new DataOutputStream(output));
+        this.channel.writeAndFlush(new AuthPacket(new DataAuthenticationResult(output.toByteArray()), issuerId));
     }
 }

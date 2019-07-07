@@ -6,11 +6,13 @@ import java.io.IOException;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import net.mrgregorix.variant.rpc.api.network.authenticator.result.AuthenticationResult;
 import net.mrgregorix.variant.rpc.api.network.exception.ConnectionClosedByRemoteHostException;
 import net.mrgregorix.variant.rpc.api.network.provider.result.FailedRpcCallResult;
 import net.mrgregorix.variant.rpc.api.network.provider.result.RpcServiceCallResult;
 import net.mrgregorix.variant.rpc.api.network.provider.result.SuccessfulRpcCallResult;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.Packet;
+import net.mrgregorix.variant.rpc.network.netty.component.proto.auth.AuthPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.callresult.CallResultPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.connectionclose.ConnectionClosedPacket;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.megapacket.MegaPacket;
@@ -54,6 +56,11 @@ public class IncomingClientPacketHandler extends ChannelInboundHandlerAdapter
                 this.handle(ctx, ((CallResultPacket) packet));
                 break;
             }
+            case PACKET_AUTH:
+            {
+                this.handle(ctx, (AuthPacket) packet);
+                break;
+            }
             default:
             {
                 throw new IllegalArgumentException("Invalid packet: " + packet.getPacketType());
@@ -63,7 +70,7 @@ public class IncomingClientPacketHandler extends ChannelInboundHandlerAdapter
 
     private void handle(final ChannelHandlerContext ctx, final ConnectionClosedPacket packet)
     {
-        ctx.channel().close();
+        this.client.stopBlocking();
         throw new ConnectionClosedByRemoteHostException(packet.getReason());
     }
 
@@ -89,5 +96,24 @@ public class IncomingClientPacketHandler extends ChannelInboundHandlerAdapter
         }
 
         this.client.notifyResult(callResult);
+    }
+
+    private void handle(final ChannelHandlerContext ctx, final AuthPacket packet) throws IOException
+    {
+        final AuthenticationResult result = packet.getAuthenticationResult();
+
+        if (result.isSuccessful())
+        {
+            this.client.authenticated();
+        }
+        else if (result.hasData())
+        {
+            this.client.authDataReceived(packet.getIssuerId(), result.getData());
+        }
+        else if (result.isFailure())
+        {
+            this.client.stopBlocking();
+            throw new ConnectionClosedByRemoteHostException(result.getFailReason());
+        }
     }
 }

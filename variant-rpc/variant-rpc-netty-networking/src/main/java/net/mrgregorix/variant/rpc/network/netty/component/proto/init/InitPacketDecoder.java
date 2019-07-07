@@ -2,9 +2,7 @@ package net.mrgregorix.variant.rpc.network.netty.component.proto.init;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
@@ -35,18 +33,8 @@ public class InitPacketDecoder implements PacketDecoder<InitPacket>
             }
         }
 
-        final short dataSize = buf.readShort();
-        final Map<String, byte[]> data = new HashMap<>(dataSize);
-        for (int i = 0; i < dataSize; i++)
-        {
-            final String name = BufferUtils.readString(buf);
-            final byte[] entry = new byte[buf.readShort()];
-            buf.readBytes(entry);
-            data.put(name, entry);
-        }
-
         final boolean persistent = buf.readBoolean();
 
-        return new InitPacket(services, unknownClasses, data, persistent);
+        return new InitPacket(services, unknownClasses, persistent);
     }
 }
