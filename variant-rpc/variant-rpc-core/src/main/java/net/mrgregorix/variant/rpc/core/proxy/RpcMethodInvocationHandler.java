@@ -45,11 +45,13 @@ public class RpcMethodInvocationHandler extends AbstractModifiablePrioritizable<
 
         if (! RpcProxyDataSpecs.CLIENT_SPEC.isPresent(proxy))
         {
+            final String name = RpcProxyDataSpecs.CLIENT_NAME_SPEC.from(proxy);
+
             client = this.variantRpc.getNetworkClients()
                                     .stream()
-                                    .filter(it -> it.getName().equals(RpcProxyDataSpecs.CLIENT_NAME_SPEC.from(proxy)))
+                                    .filter(it -> it.getName().equals(name))
                                     .findAny()
-                                    .orElseThrow(() -> new IllegalStateException("No clients matching the given name found"));
+                                    .orElseThrow(() -> new IllegalStateException("No clients matching the given name (" + name + ") found"));
 
             RpcProxyDataSpecs.CLIENT_SPEC.set(proxy, client);
         }
