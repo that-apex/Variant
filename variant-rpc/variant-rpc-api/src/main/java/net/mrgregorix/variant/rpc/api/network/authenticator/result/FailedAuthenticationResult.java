@@ -1,5 +1,7 @@
 package net.mrgregorix.variant.rpc.api.network.authenticator.result;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Represents a {@link AuthenticationResult} that fails the client's authentication and disconnects them.
  */
@@ -27,5 +29,13 @@ public class FailedAuthenticationResult extends AbstractAuthenticationResult
     public String getFailReason()
     {
         return this.failReason;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("failReason", this.failReason)
+                          .toString();
     }
 }

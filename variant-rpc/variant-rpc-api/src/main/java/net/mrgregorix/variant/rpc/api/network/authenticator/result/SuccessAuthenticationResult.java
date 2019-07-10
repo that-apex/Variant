@@ -1,5 +1,7 @@
 package net.mrgregorix.variant.rpc.api.network.authenticator.result;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Represents a {@link AuthenticationResult} that successfully authenticates client and lets him connect.
  */
@@ -14,5 +16,12 @@ public class SuccessAuthenticationResult extends AbstractAuthenticationResult
     public boolean isSuccessful()
     {
         return true;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .toString();
     }
 }

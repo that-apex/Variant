@@ -1,5 +1,6 @@
 package net.mrgregorix.variant.rpc.network.netty.component.handler;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import io.netty.buffer.ByteBuf;
@@ -20,6 +21,10 @@ public class PacketMessageHandler extends ChannelDuplexHandler
     private @Nullable ByteBuf    currentData;
     private @Nullable PacketType packetType   = null;
     private           int        expectedSize = - 1;
+
+    public PacketMessageHandler()
+    {
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -102,9 +107,25 @@ public class PacketMessageHandler extends ChannelDuplexHandler
         return true;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private Packet decodePacketAndReset()
     {
+        if (Boolean.getBoolean("variant.netty.debugPacketsRaw"))
+        {
+            this.currentData.markReaderIndex();
+            final byte[] data = new byte[this.currentData.readableBytes()];
+            this.currentData.readBytes(data);
+            this.currentData.resetReaderIndex();
+            System.out.println(this.hashCode() + ": Raw data: type = " + this.packetType + ", size = " + data.length + ", data = " + Arrays.toString(data));
+        }
+
         final Packet packet = Objects.requireNonNull(this.packetType).getDecoder().decodePacket(this.currentData);
+
+        if (Boolean.getBoolean("variant.netty.debugPackets"))
+        {
+            System.out.println(this.hashCode() + ": Decoded: " + packet);
+        }
+
         this.packetType = null;
         this.expectedSize = - 1;
         return packet;

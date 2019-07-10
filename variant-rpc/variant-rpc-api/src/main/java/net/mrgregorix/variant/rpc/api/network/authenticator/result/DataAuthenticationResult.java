@@ -1,5 +1,7 @@
 package net.mrgregorix.variant.rpc.api.network.authenticator.result;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Represents a {@link AuthenticationResult} that has additional data to be send to the client.
  */
@@ -27,5 +29,13 @@ public class DataAuthenticationResult extends AbstractAuthenticationResult
     public byte[] getData()
     {
         return this.data;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("data", this.data)
+                          .toString();
     }
 }

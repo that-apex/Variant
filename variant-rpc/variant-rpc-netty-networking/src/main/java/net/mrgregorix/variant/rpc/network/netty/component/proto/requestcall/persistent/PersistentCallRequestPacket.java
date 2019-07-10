@@ -1,5 +1,6 @@
 package net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.persistent;
 
+import com.google.common.base.MoreObjects;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.PacketType;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.CallRequestPacket;
 
@@ -23,5 +24,15 @@ public class PersistentCallRequestPacket extends CallRequestPacket
     public int getMethodId()
     {
         return this.methodId;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("super", super.toString())
+                          .add("serviceId", this.serviceId)
+                          .add("methodId", this.methodId)
+                          .toString();
     }
 }

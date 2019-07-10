@@ -1,5 +1,6 @@
 package net.mrgregorix.variant.rpc.network.netty.component.proto.callresult;
 
+import com.google.common.base.MoreObjects;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.Packet;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.PacketType;
 import net.mrgregorix.variant.utils.annotation.Nullable;
@@ -58,5 +59,16 @@ public class CallResultPacket extends Packet
         }
 
         return this.exceptionValue;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("callId", this.callId)
+                          .add("success", this.success)
+                          .add("returnValue", this.returnValue)
+                          .add("exceptionValue", this.exceptionValue)
+                          .toString();
     }
 }

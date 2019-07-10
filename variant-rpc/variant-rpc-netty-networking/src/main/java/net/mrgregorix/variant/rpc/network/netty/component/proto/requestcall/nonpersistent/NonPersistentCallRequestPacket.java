@@ -2,6 +2,7 @@ package net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.non
 
 import java.lang.reflect.Method;
 
+import com.google.common.base.MoreObjects;
 import net.mrgregorix.variant.rpc.api.service.RpcService;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.PacketType;
 import net.mrgregorix.variant.rpc.network.netty.component.proto.requestcall.CallRequestPacket;
@@ -26,5 +27,15 @@ public class NonPersistentCallRequestPacket extends CallRequestPacket
     public Method getMethod()
     {
         return this.method;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("super", super.toString())
+                          .add("service", this.service)
+                          .add("method", this.method)
+                          .toString();
     }
 }
