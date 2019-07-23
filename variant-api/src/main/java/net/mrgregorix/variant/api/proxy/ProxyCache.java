@@ -53,8 +53,7 @@ public interface ProxyCache
      *
      * @return the current (existing or computed) proxy for the base type
      */
-    default <T> Class<? extends T> addIfAbsent(final Class<T> baseType,
-                                               final Function<Class<T>, Class<? extends T>> proxyType)
+    default <T> Class<? extends T> addIfAbsent(final Class<T> baseType, final Function<? super Class<T>, Class<? extends T>> proxyType)
     {
         final Class<? extends T> proxy = this.findProxy(baseType);
         if (proxy != null)

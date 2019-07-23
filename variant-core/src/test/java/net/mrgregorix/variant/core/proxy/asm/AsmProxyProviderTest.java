@@ -23,6 +23,7 @@ public class AsmProxyProviderTest
             .build();
     }
 
+    @SuppressWarnings("MagicNumber")
     @Test
     public void test()
     {
@@ -83,8 +84,8 @@ public class AsmProxyProviderTest
         final InterfaceTest instance = this.variant.instantiate(InterfaceTest.class);
         assertThat("instance base class is invalid", ((Proxy) instance).getProxyBaseClass(), is(InterfaceTest.class));
 
-        final int callCount = InterfaceTest.CallCount.VALUE;
+        final int callCount = InterfaceTest.CallCount.value;
         instance.doSomething();
-        assertThat("method was not called", callCount + 1, is(InterfaceTest.CallCount.VALUE));
+        assertThat("method was not called", callCount + 1, is(InterfaceTest.CallCount.value));
     }
 }

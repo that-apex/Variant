@@ -15,6 +15,7 @@ import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.RadixNotSupported;
 import net.mrgregorix.variant.commands.api.parser.exception.ValueSyntaxException;
 import net.mrgregorix.variant.commands.core.parser.defaults.PrimitiveTypeParser;
+import net.mrgregorix.variant.utils.annotation.Nullable;
 
 /**
  * A {@link TypeParser} parser for the numeric primitives
@@ -26,10 +27,10 @@ public class NumberTypeParser <N extends Number> extends PrimitiveTypeParser<N>
     private static final List<Character> ALLOWED_CHARACTERS_INTEGER        = Chars.asList("0123456789-".toCharArray());
     private static final List<Character> ALLOWED_CHARACTERS_FLOATING_POINT = Chars.asList("-.,".toCharArray());
 
-    private final boolean                        isFloatingPoint;
-    private final BiFunction<String, Integer, N> parseInteger;
+    private final boolean                                                  isFloatingPoint;
+    private final BiFunction<? super String, ? super Integer, ? extends N> parseInteger;
 
-    public NumberTypeParser(final Class<N> wrapperType, final Class<?> primitiveType, final boolean isFloatingPoint, final BiFunction<String, Integer, N> parseInteger)
+    public NumberTypeParser(final Class<N> wrapperType, final Class<?> primitiveType, final boolean isFloatingPoint, final BiFunction<? super String, ? super Integer, ? extends N> parseInteger)
     {
         super(wrapperType, primitiveType);
 
@@ -86,10 +87,11 @@ public class NumberTypeParser <N extends Number> extends PrimitiveTypeParser<N>
         }
     }
 
+    @Nullable
     @Override
     public N parseDefaultValue(final ArgumentParser argumentParser, final TypeDefinition defaultValue) throws ParsingException
     {
-        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().length() == 0)
+        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().isEmpty())
         {
             return null;
         }

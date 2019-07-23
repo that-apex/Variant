@@ -55,6 +55,7 @@ import net.mrgregorix.variant.rpc.network.netty.configuration.ConfigurationFacto
 public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent implements RpcNetworkClient
 {
     private static final long MISSED_RESULTS_REFRESH_TIME = TimeUnit.SECONDS.toMillis(1);
+    private static final long CONNECT_WAIT_TIME           = TimeUnit.SECONDS.toMillis(1);
 
     private final AtomicInteger                        callId             = new AtomicInteger(0);
     private final AtomicBoolean                        connectingNow      = new AtomicBoolean();
@@ -293,7 +294,7 @@ public class NettyRpcNetworkClient extends AbstractNettyNetworkComponent impleme
             {
                 try
                 {
-                    this.wait(1000L);
+                    this.wait(CONNECT_WAIT_TIME);
                 }
                 catch (final InterruptedException e)
                 {

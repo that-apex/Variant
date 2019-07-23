@@ -22,7 +22,7 @@ public class IpAuthentication implements RpcAuthenticator
     @Nullable
     private final Collection<String> blacklist;
 
-    private IpAuthentication(final Collection<String> whitelist, final Collection<String> blacklist)
+    private IpAuthentication(@Nullable final Collection<String> whitelist, @Nullable final Collection<String> blacklist)
     {
         this.whitelist = whitelist;
         this.blacklist = blacklist;

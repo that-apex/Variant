@@ -135,7 +135,7 @@ public interface VariantRpc extends VariantModule
      *
      * @return a newly created, managed server
      */
-    RpcNetworkServer setupServer(String name, String address, int port, Collection<ServiceImplementationDetail<?, ?>> serviceImplementationDetails);
+    RpcNetworkServer setupServer(String name, String address, int port, Collection<? extends ServiceImplementationDetail<?, ?>> serviceImplementationDetails);
 
     /**
      * Disposes the given server. The server will be shutdown before if its running. After disposal the server is no longer managed by this RPC.

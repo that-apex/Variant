@@ -2,6 +2,7 @@ package net.mrgregorix.variant.commands.core.parser.defaults.primitive;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import net.mrgregorix.variant.commands.api.parser.ArgumentParser;
 import net.mrgregorix.variant.commands.api.parser.StringParser;
@@ -11,6 +12,7 @@ import net.mrgregorix.variant.commands.api.parser.UseDefaultTypeException;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.api.parser.exception.ValueSyntaxException;
 import net.mrgregorix.variant.commands.core.parser.defaults.PrimitiveTypeParser;
+import net.mrgregorix.variant.utils.annotation.Nullable;
 
 /**
  * {@link TypeParser} parser for the {@code boolean} primitive
@@ -87,14 +89,14 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
     @Override
     public Boolean parseType(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition typeDefinition) throws ParsingException
     {
-        final String stringValue = argumentParser.getParserFor(String.class).parseType(argumentParser, parser, typeDefinition).toLowerCase();
+        final String stringValue = Objects.requireNonNull(argumentParser.getParserFor(String.class).parseType(argumentParser, parser, typeDefinition)).toLowerCase();
 
         return this.fromString(stringValue);
     }
 
     private Boolean fromString(final String stringValue) throws ValueSyntaxException
     {
-        if (stringValue.equals("_"))
+        if ("_".equals(stringValue))
         {
             throw new UseDefaultTypeException();
         }
@@ -111,10 +113,11 @@ public class BooleanTypeParser extends PrimitiveTypeParser<Boolean>
         throw new ValueSyntaxException("Not a boolean: " + stringValue, boolean.class);
     }
 
+    @Nullable
     @Override
     public Boolean parseDefaultValue(final ArgumentParser argumentParser, final TypeDefinition defaultValue) throws ParsingException
     {
-        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().length() == 0)
+        if (! defaultValue.getType().isPrimitive() && defaultValue.defaultValue().isEmpty())
         {
             return null;
         }

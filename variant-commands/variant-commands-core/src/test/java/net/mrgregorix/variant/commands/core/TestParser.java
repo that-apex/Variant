@@ -46,7 +46,7 @@ public class TestParser
         assertThrows(IllegalArgumentException.class, stringParser::readCharacter);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "MagicNumber"})
     @Test
     public void testCommandParser() throws ParsingException
     {

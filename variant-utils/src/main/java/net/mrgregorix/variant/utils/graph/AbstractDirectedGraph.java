@@ -80,7 +80,7 @@ public abstract class AbstractDirectedGraph <T> implements DirectedGraph<T>
      *
      * @return amount of successfully performed functions
      */
-    private <S> int doBatch(final Predicate<S> function, final Collection<S> collection, final Runnable end)
+    private <S> int doBatch(final Predicate<? super S> function, final Collection<? extends S> collection, final Runnable end)
     {
         final int successes = (int) collection.stream().filter(function).count();
 
@@ -116,7 +116,7 @@ public abstract class AbstractDirectedGraph <T> implements DirectedGraph<T>
     }
 
     @Override
-    public int removeEdges(final Collection<Edge<T>> edges)
+    public int removeEdges(final Collection<? extends Edge<T>> edges)
     {
         return this.doBatch(this::removeEdgeOnly, edges, this::deleteOrphanedEdgesAndVertices);
     }
@@ -128,7 +128,7 @@ public abstract class AbstractDirectedGraph <T> implements DirectedGraph<T>
     }
 
     @Override
-    public int removeVertices(final Collection<T> vertices)
+    public int removeVertices(final Collection<? extends T> vertices)
     {
         return this.doBatch(this::removeVertexOnly, vertices, this::deleteOrphanedEdgesAndVertices);
     }

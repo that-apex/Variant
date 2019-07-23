@@ -8,7 +8,7 @@ import com.google.common.base.MoreObjects;
 public class SuccessAuthenticationResult extends AbstractAuthenticationResult
 {
     /**
-     * A shared instnace of {@link SuccessAuthenticationResult}, should be used instead of creating a new instance every time
+     * A shared instance of {@link SuccessAuthenticationResult}, should be used instead of creating a new instance every time
      */
     public static final SuccessAuthenticationResult INSTANCE = new SuccessAuthenticationResult();
 

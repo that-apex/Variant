@@ -15,9 +15,9 @@ import net.mrgregorix.variant.commands.core.manager.RegisteredMethod;
  */
 public class ValueProviderParameterResolver implements ParameterResolver
 {
-    private final ValueProvider<Annotation> provider;
-    private final Parameter                 parameter;
-    private final Annotation                annotation;
+    private final ValueProvider<? super Annotation> provider;
+    private final Parameter                         parameter;
+    private final Annotation                        annotation;
 
     /**
      * Creates a new ValueProviderParameterResolver
@@ -26,7 +26,7 @@ public class ValueProviderParameterResolver implements ParameterResolver
      * @param parameter  parameter that the value is resolved for
      * @param annotation annotation with {@link ParameterDescription} on the parameter
      */
-    public ValueProviderParameterResolver(final ValueProvider<Annotation> provider, final Parameter parameter, final Annotation annotation)
+    public ValueProviderParameterResolver(final ValueProvider<? super Annotation> provider, final Parameter parameter, final Annotation annotation)
     {
         this.provider = provider;
         this.parameter = parameter;

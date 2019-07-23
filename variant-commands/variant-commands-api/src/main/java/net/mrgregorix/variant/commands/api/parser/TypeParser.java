@@ -1,6 +1,7 @@
 package net.mrgregorix.variant.commands.api.parser;
 
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
+import net.mrgregorix.variant.utils.annotation.Nullable;
 import net.mrgregorix.variant.utils.priority.ModifiablePrioritizable;
 
 /**
@@ -41,6 +42,7 @@ public interface TypeParser <T, P extends TypeParser<T, P>> extends ModifiablePr
      *
      * @throws ParsingException when an error occurred while parsing the value
      */
+    @Nullable
     T parseType(ArgumentParser argumentParser, StringParser parser, TypeDefinition typeDefinition) throws ParsingException;
 
     /**
@@ -53,5 +55,6 @@ public interface TypeParser <T, P extends TypeParser<T, P>> extends ModifiablePr
      *
      * @throws ParsingException when an error occurred while parsing the default value
      */
+    @Nullable
     T parseDefaultValue(ArgumentParser argumentParser, TypeDefinition defaultValue) throws ParsingException;
 }

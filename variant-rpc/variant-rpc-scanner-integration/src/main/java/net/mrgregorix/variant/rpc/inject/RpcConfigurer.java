@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -33,7 +32,6 @@ import net.mrgregorix.variant.rpc.inject.config.authentications.PublicKeyAuthent
 import net.mrgregorix.variant.rpc.inject.deserializer.RpcConfigAuthenticationsDeserializer;
 import net.mrgregorix.variant.scanner.api.VariantScanner;
 import net.mrgregorix.variant.utils.annotation.AnnotationUtils;
-import org.reflections.Reflections;
 
 /**
  * A helper class for configuring {@link VariantRpc} using a provided config.

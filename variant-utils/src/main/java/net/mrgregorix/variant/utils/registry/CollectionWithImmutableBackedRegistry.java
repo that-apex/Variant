@@ -15,14 +15,14 @@ import net.mrgregorix.variant.utils.collections.immutable.WrappedCollectionWithI
  */
 public class CollectionWithImmutableBackedRegistry <T, C extends ImmutableCollection<T>> extends CollectionBackedRegistry<T>
 {
-    private final CollectionWithImmutable<T, C> backingCollection;
+    private final CollectionWithImmutable<T, ? extends C> backingCollection;
 
     /**
      * Creates a new CollectionWithImmutableBackedRegistry with the supplied backing collection
      *
      * @param backingCollection backed collection
      */
-    public CollectionWithImmutableBackedRegistry(final CollectionWithImmutable<T, C> backingCollection)
+    public CollectionWithImmutableBackedRegistry(final CollectionWithImmutable<T, ? extends C> backingCollection)
     {
         super(backingCollection);
         this.backingCollection = backingCollection;

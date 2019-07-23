@@ -50,6 +50,7 @@ public class TestSerialize
         this.testSerializer(new NonPersistentDataSerializer(serializerSpec), new NonPersistentDataSerializer(serializerSpec));
     }
 
+    @SuppressWarnings("MagicNumber")
     private void testSerializer(final DataSerializer serializerWrite, final DataSerializer serializerRead) throws IOException
     {
         // test
@@ -85,10 +86,10 @@ public class TestSerialize
         final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
         final DataInputStream inputData = new DataInputStream(input);
 
-        SerializedClass.SETTER_USED = false;
+        SerializedClass.setterUsed = false;
         final Object deserializedObject = serializerRead.deserialize(inputData);
         assertThat("deserialized object does not extend SerializedClass", deserializedObject, is(instanceOf(SerializedClass.class)));
-        assertThat("setter not used", SerializedClass.SETTER_USED);
+        assertThat("setter not used", SerializedClass.setterUsed);
 
         final SerializedClass deserializedClass = (SerializedClass) deserializedObject;
         assertThat("deserializer cannot return an existing instance", deserializedClass, is(not(sameInstance(serializedClass))));

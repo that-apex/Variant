@@ -17,14 +17,14 @@ import net.mrgregorix.variant.utils.exception.ExceptionUtils;
  */
 public class StandardServerHandler implements RpcServerHandler
 {
-    private final Map<Class<? extends RpcService>, RpcService> implementationData;
+    private final Map<Class<? extends RpcService>, ? extends RpcService> implementationData;
 
     /**
      * Crates a new StandardServerHandler
      *
      * @param implementationData map containing services implementation
      */
-    public StandardServerHandler(final Map<Class<? extends RpcService>, RpcService> implementationData)
+    public StandardServerHandler(final Map<Class<? extends RpcService>, ? extends RpcService> implementationData)
     {
         this.implementationData = implementationData;
     }

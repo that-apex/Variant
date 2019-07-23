@@ -1,5 +1,6 @@
 package net.mrgregorix.variant.utils.reflect;
 
+@SuppressWarnings("PublicField")
 class BaseClass
 {
     public int baseField;

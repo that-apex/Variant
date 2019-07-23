@@ -63,7 +63,7 @@ public class SimpleMapProxyCache implements ProxyCache
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Class<? extends T> addIfAbsent(Class<T> baseType, Function<Class<T>, Class<? extends T>> proxyType)
+    public <T> Class<? extends T> addIfAbsent(Class<T> baseType, Function<? super Class<T>, Class<? extends T>> proxyType)
     {
         return (Class<? extends T>) this.map.computeIfAbsent(baseType, (ignored) -> proxyType.apply(baseType));
     }

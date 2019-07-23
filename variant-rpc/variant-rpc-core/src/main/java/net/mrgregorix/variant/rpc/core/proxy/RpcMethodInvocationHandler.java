@@ -32,7 +32,7 @@ public class RpcMethodInvocationHandler extends AbstractModifiablePrioritizable<
     }
 
     @Override
-    public BeforeInvocationResult beforeInvocation(final Proxy proxy, final Method method, final Object[] arguments) throws Exception
+    public BeforeInvocationResult beforeInvocation(final Proxy proxy, final Method method, final Object[] arguments)
     {
         return BeforeInvocationResult.proceed();
     }

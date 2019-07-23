@@ -1,8 +1,6 @@
 package net.mrgregorix.variant.rpc.inject.client;
 
 import net.mrgregorix.variant.inject.api.annotation.Inject;
-import net.mrgregorix.variant.rpc.inject.client.GreetingServiceRpc;
-import net.mrgregorix.variant.rpc.inject.client.PublicGreeting;
 import net.mrgregorix.variant.rpc.inject.annotation.InjectRpc;
 import net.mrgregorix.variant.scanner.api.Managed;
 

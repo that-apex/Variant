@@ -190,7 +190,7 @@ public class VariantImpl implements Variant
         return validLaxMatch;
     }
 
-    private <T> Class<? extends T> createProxy(final Class<T> type)
+    private <T> Class<? extends T> createProxy(final Class<? extends T> type)
     {
         Preconditions.checkArgument(! Modifier.isFinal(type.getModifiers()), "cannot proxy a final class");
 

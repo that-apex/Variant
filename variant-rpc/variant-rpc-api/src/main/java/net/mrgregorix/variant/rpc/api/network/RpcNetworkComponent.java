@@ -25,9 +25,9 @@ public interface RpcNetworkComponent
     String getAddress();
 
     /**
-     * Returns a {@link Registry} containing all {@link RpcAuthenticator}s regisered to this component.
+     * Returns a {@link Registry} containing all {@link RpcAuthenticator}s registered to this component.
      *
-     * @return {@link Registry} containing all {@link RpcAuthenticator}s regisered to this component
+     * @return {@link Registry} containing all {@link RpcAuthenticator}s registered to this component
      */
     Registry<RpcAuthenticator> getAuthenticatorRegistry();
 

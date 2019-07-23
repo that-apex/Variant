@@ -30,11 +30,11 @@ public class PrimitiveSerializer <T> extends AbstractModifiablePrioritizable<Typ
      */
     private static final CollectionWithImmutable<PrimitiveSerializer<?>, ImmutableList<PrimitiveSerializer<?>>> PRIMITIVE_SERIALIZERS = WrappedCollectionWithImmutable.withImmutableList(new ArrayList<>());
 
-    private final int             id;
-    private final Class<?>        primitiveType;
-    private final Class<T>        type;
-    private final Serializer<T>   serializer;
-    private final Deserializer<T> deserializer;
+    private final int                       id;
+    private final Class<?>                  primitiveType;
+    private final Class<? extends T>        type;
+    private final Serializer<? super T>     serializer;
+    private final Deserializer<? extends T> deserializer;
 
     /**
      * Crates a new PrimitiveSerializer
@@ -45,7 +45,7 @@ public class PrimitiveSerializer <T> extends AbstractModifiablePrioritizable<Typ
      * @param serializer    a {@link Serializer} used for serializing this primitive type
      * @param deserializer  a {@link Deserializer} used for deserializing this primitive type
      */
-    private PrimitiveSerializer(final int id, final Class<?> primitiveType, final Class<T> type, final Serializer<T> serializer, final Deserializer<T> deserializer)
+    private PrimitiveSerializer(final int id, final Class<?> primitiveType, final Class<? extends T> type, final Serializer<? super T> serializer, final Deserializer<? extends T> deserializer)
     {
         this.setPriority(PriorityConstants.HIGHEST);
         this.id = id;
@@ -86,7 +86,7 @@ public class PrimitiveSerializer <T> extends AbstractModifiablePrioritizable<Typ
     }
 
     @Override
-    public void deserialize(final T object, final DataInputStream data, final Class<?> deserializeAs) throws IOException
+    public void deserialize(final T object, final DataInputStream data, final Class<?> deserializeAs)
     {
     }
 

@@ -37,7 +37,7 @@ public class MemberUtils
         return fields;
     }
 
-    private static <T extends Member> void findMembersRecursively(final Set<T> output, final Class<?> clazz, final Function<Class<?>, T[]> retrieve)
+    private static <T extends Member> void findMembersRecursively(final Set<? super T> output, final Class<?> clazz, final Function<? super Class<?>, T[]> retrieve)
     {
         Collections.addAll(output, retrieve.apply(clazz));
 

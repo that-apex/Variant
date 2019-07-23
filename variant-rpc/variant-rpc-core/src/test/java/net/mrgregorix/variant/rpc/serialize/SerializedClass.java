@@ -6,9 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings("PublicField")
 public class SerializedClass extends ParentClass
 {
-    public static boolean      SETTER_USED = false;
+    public static boolean      setterUsed = false;
     public        int          i;
     public        long         j;
     public        double       k;
@@ -52,7 +53,7 @@ public class SerializedClass extends ParentClass
     public void setDoubleArray(final double[] doubleArray)
     {
         this.doubleArray = doubleArray;
-        SETTER_USED = true;
+        setterUsed = true;
     }
 
     @Override

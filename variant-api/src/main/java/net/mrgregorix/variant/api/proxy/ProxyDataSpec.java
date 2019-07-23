@@ -9,8 +9,8 @@ import java.util.function.Supplier;
  */
 public class ProxyDataSpec <T>
 {
-    private final String      name;
-    private final Supplier<T> defaultValueSupplier;
+    private final String                name;
+    private final Supplier<? extends T> defaultValueSupplier;
 
     /**
      * Constructs a new {@link ProxyDataSpec} using the given name.
@@ -18,7 +18,7 @@ public class ProxyDataSpec <T>
      * @param name                 name to be used. This will be used as a key in additional proxy data map
      * @param defaultValueSupplier supplier that will be called to get a default value for a spec.
      */
-    public ProxyDataSpec(final String name, final Supplier<T> defaultValueSupplier)
+    public ProxyDataSpec(final String name, final Supplier<? extends T> defaultValueSupplier)
     {
         this.name = name;
         this.defaultValueSupplier = defaultValueSupplier;

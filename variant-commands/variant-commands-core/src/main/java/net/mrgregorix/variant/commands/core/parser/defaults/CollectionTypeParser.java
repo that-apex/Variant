@@ -144,7 +144,7 @@ public class CollectionTypeParser extends AbstractDefaultTypeParser<Collection, 
         @Override
         public String defaultValue()
         {
-            return null;
+            return "";
         }
     }
 }

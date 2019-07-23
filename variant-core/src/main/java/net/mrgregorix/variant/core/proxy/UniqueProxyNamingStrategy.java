@@ -8,10 +8,10 @@ import net.mrgregorix.variant.api.proxy.ProxyNamingStrategy;
  */
 public class UniqueProxyNamingStrategy implements ProxyNamingStrategy
 {
+    @SuppressWarnings("MagicNumber")
     @Override
     public String nameProxyClass(final Variant variant, final Class<?> classToBeProxied)
     {
-        return classToBeProxied.getName()
-               + "$VariantProxy_" + Integer.toString(variant.hashCode(), 16);
+        return classToBeProxied.getName() + "$VariantProxy_" + Integer.toString(variant.hashCode(), 16);
     }
 }

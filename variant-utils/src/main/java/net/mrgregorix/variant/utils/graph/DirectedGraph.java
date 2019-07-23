@@ -71,7 +71,7 @@ public interface DirectedGraph <T>
      *
      * @see #removeEdge(Edge)
      */
-    int removeEdges(Collection<Edge<T>> edges);
+    int removeEdges(Collection<? extends Edge<T>> edges);
 
     /**
      * Removes a vertex from the graph and all edges that was pointing to that vertex or from that vertex.
@@ -85,11 +85,13 @@ public interface DirectedGraph <T>
     /**
      * Removes vertices from the graph. This method works similar to {@link #removeVertex(Object)} but checks for orphaned nodes to delete only after all of the vertices were removed.
      *
+     * @param vertices vertices to remove
+     *
      * @return how much vertices were successfully removed
      *
      * @see #removeVertex(Object)
      */
-    int removeVertices(Collection<T> vertices);
+    int removeVertices(Collection<? extends T> vertices);
 
     /**
      * @return a collection containing all graph's edges

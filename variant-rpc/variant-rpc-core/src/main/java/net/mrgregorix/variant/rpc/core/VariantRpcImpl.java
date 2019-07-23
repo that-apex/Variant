@@ -38,10 +38,10 @@ public class VariantRpcImpl implements VariantRpc
 {
     public static final String MODULE_NAME = "Variant::RPC::Core";
 
-    private CollectionWithImmutable<RpcService, ImmutableSet<RpcService>>             registeredServices                = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
-    private CollectionWithImmutable<RpcService, ImmutableSet<RpcService>>             registeredServicesImplementations = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
-    private CollectionWithImmutable<RpcNetworkClient, ImmutableSet<RpcNetworkClient>> networkClients                    = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
-    private CollectionWithImmutable<RpcNetworkServer, ImmutableSet<RpcNetworkServer>> networkServers                    = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
+    private final CollectionWithImmutable<RpcService, ImmutableSet<RpcService>>             registeredServices                = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
+    private final CollectionWithImmutable<RpcService, ImmutableSet<RpcService>>             registeredServicesImplementations = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
+    private final CollectionWithImmutable<RpcNetworkClient, ImmutableSet<RpcNetworkClient>> networkClients                    = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
+    private final CollectionWithImmutable<RpcNetworkServer, ImmutableSet<RpcNetworkServer>> networkServers                    = WrappedCollectionWithImmutable.withImmutableSet(new HashSet<>());
 
     private DataSerializer        persistentDataSerializer;
     private DataSerializer        nonPersistentDataSerializer;
@@ -93,7 +93,7 @@ public class VariantRpcImpl implements VariantRpc
             .filter(type::isInstance)
             .collect(Collectors.toUnmodifiableList());
 
-        if (matching.size() == 0)
+        if (matching.isEmpty())
         {
             throw new IllegalArgumentException("No services matching the type " + type + " found");
         }
@@ -160,7 +160,7 @@ public class VariantRpcImpl implements VariantRpc
     }
 
     @Override
-    public RpcNetworkServer setupServer(final String name, final String address, final int port, final Collection<ServiceImplementationDetail<?, ?>> serviceImplementationDetails)
+    public RpcNetworkServer setupServer(final String name, final String address, final int port, final Collection<? extends ServiceImplementationDetail<?, ?>> serviceImplementationDetails)
     {
         final Collection<Class<? extends RpcService>> handlers = serviceImplementationDetails.stream().map(ServiceImplementationDetail::getService).collect(Collectors.toList());
         final Map<Class<? extends RpcService>, RpcService> implementationMap = serviceImplementationDetails

@@ -19,7 +19,7 @@ public class ExceptionUtils
      */
     public static boolean preferRealExceptions()
     {
-        return System.getProperty("variant.preferRealExceptions", "false").equalsIgnoreCase("true");
+        return "true".equalsIgnoreCase(System.getProperty("variant.preferRealExceptions", "false"));
     }
 
     /**

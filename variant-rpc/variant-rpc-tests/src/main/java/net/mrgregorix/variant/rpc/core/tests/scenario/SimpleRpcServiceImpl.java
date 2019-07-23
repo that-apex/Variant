@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class SimpleRpcServiceImpl implements SimpleRpcService
 {
-    private Map<String, String> resources = new HashMap<>();
+    private final Map<String, String> resources = new HashMap<>();
 
     @Override
     public Date getRemoteTime()

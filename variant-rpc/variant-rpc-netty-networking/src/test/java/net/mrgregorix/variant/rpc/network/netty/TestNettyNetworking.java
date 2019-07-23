@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+@SuppressWarnings("MagicNumber")
 public class TestNettyNetworking
 {
     private VariantRpc rpc;
@@ -97,7 +98,7 @@ public class TestNettyNetworking
                 success = false;
             }
 
-            Assertions.assertEquals(expectSuccess, success, "The call was " + (success ? "successful" : "unsuccesful") + " when the server was supposed to be " + (expectSuccess ? "started" : "stopped"));
+            Assertions.assertEquals(expectSuccess, success, "The call was " + (success ? "successful" : "unsuccessful") + " when the server was supposed to be " + (expectSuccess ? "started" : "stopped"));
 
             try
             {

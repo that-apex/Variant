@@ -195,7 +195,7 @@ public abstract class AbstractObjectSerializer extends AbstractModifiablePriorit
      * @return the found method or {@code null} if none found
      */
     @Nullable
-    private Method findAccessMethod(final Field field, final Predicate<Method> predicate, final String... prefixes)
+    private Method findAccessMethod(final Field field, final Predicate<? super Method> predicate, final String... prefixes)
     {
         final String nameUpper = Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
 

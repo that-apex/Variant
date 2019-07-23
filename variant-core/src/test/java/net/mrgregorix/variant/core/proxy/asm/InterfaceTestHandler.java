@@ -12,7 +12,7 @@ class InterfaceTestHandler extends AbstractModifiablePrioritizable<InterfaceTest
     @Override
     public BeforeInvocationResult beforeInvocation(Proxy proxy, Method method, Object[] arguments)
     {
-        InterfaceTest.CallCount.VALUE++;
+        InterfaceTest.CallCount.value++;
         return BeforeInvocationResult.proceed();
     }
 

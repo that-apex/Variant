@@ -19,6 +19,8 @@ import net.mrgregorix.variant.utils.reflect.PrimitiveUtils;
  */
 public class ArraySerializer extends AbstractModifiablePrioritizable<TypeSerializer<Object>> implements TypeSerializer<Object>
 {
+    public static final String TYPE_ID = Character.toString((char) 11);
+
     private final DataSerializer dataSerializer;
 
     /**
@@ -53,7 +55,7 @@ public class ArraySerializer extends AbstractModifiablePrioritizable<TypeSeriali
     @Override
     public String getIdentifier()
     {
-        return "" + (char) 11;
+        return TYPE_ID;
     }
 
     @Override

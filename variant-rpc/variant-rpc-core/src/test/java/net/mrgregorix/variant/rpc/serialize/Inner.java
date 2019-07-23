@@ -2,6 +2,7 @@ package net.mrgregorix.variant.rpc.serialize;
 
 import java.util.Objects;
 
+@SuppressWarnings("PublicField")
 public class Inner
 {
     public           int component;

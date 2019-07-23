@@ -8,7 +8,7 @@
             <Port>8445</Port>
 
             <Authentication>
-                <PublicKeyAuthentication publicKey="src/test/resources/test_key.pub" />
+                <PublicKeyAuthentication publicKey="src/test/resources/test_key.pub"/>
 
                 <IpAuthentication>
                     <Whitelist>

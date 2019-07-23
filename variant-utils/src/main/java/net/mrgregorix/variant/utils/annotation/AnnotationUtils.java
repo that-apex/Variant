@@ -38,7 +38,7 @@ public final class AnnotationUtils
      *
      * @return collection of all found annotations
      */
-    public static Collection<Annotation> getAnnotationsMatching(final AnnotatedElement annotatedElement, final Predicate<Annotation> matcher)
+    public static Collection<Annotation> getAnnotationsMatching(final AnnotatedElement annotatedElement, final Predicate<? super Annotation> matcher)
     {
         return findAnnotationsInternal(annotatedElement, matcher, false);
     }
@@ -52,7 +52,7 @@ public final class AnnotationUtils
      * @return the found annotation or null if none found
      */
     @Nullable
-    public static Annotation getFirstAnnotationsMatching(final AnnotatedElement annotatedElement, final Predicate<Annotation> matcher)
+    public static Annotation getFirstAnnotationsMatching(final AnnotatedElement annotatedElement, final Predicate<? super Annotation> matcher)
     {
         final Collection<Annotation> result = findAnnotationsInternal(annotatedElement, matcher, true);
         return result.isEmpty() ? null : result.iterator().next();
@@ -87,7 +87,7 @@ public final class AnnotationUtils
     }
 
 
-    private static Collection<Annotation> findAnnotationsInternal(final AnnotatedElement annotatedElement, final Predicate<Annotation> matcher, final boolean first)
+    private static Collection<Annotation> findAnnotationsInternal(final AnnotatedElement annotatedElement, final Predicate<? super Annotation> matcher, final boolean first)
     {
         final Set<Annotation> result = first ? new HashSet<>(1) : new HashSet<>();
         final Set<Annotation> checked = new HashSet<>();
@@ -95,7 +95,7 @@ public final class AnnotationUtils
         return result;
     }
 
-    private static boolean findAnnotationsRecurse(final AnnotatedElement annotatedElement, final Predicate<Annotation> matcher, final Set<Annotation> result, final Set<Annotation> checked,
+    private static boolean findAnnotationsRecurse(final AnnotatedElement annotatedElement, final Predicate<? super Annotation> matcher, final Set<? super Annotation> result, final Set<? super Annotation> checked,
                                                   final boolean first)
     {
         for (final Annotation declaredAnnotation : annotatedElement.getDeclaredAnnotations())

@@ -46,7 +46,6 @@ public interface TypeDefinition
      *
      * @return the default value for the definition, or {@code null} if none
      */
-    @Nullable
     String defaultValue();
 
     /**

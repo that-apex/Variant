@@ -22,7 +22,7 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel>
     }
 
     @Override
-    protected void initChannel(final Channel ch) throws Exception
+    protected void initChannel(final Channel ch)
     {
         this.server.addChannel(ch);
 

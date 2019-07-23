@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.*;
 
 public class TestServices
 {
+    @SuppressWarnings("MagicNumber")
     public static void testServices(final VariantRpc variantRpc, boolean persistent, int port)
     {
         try
@@ -81,6 +82,7 @@ public class TestServices
         }
     }
 
+    @SuppressWarnings("MagicNumber")
     public static void testReconnecting(final VariantRpc rpc, final int port)
     {
         final RpcNetworkServer server = rpc.setupServer("test-server", "127.0.0.1", port, Collections.singletonList(new ServiceImplementationDetail<>(SimpleRpcService.class, new SimpleRpcServiceImpl())));

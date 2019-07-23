@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -31,7 +30,7 @@ public class RpcConfigAuthenticationsDeserializer extends StdDeserializer<RpcCon
     }
 
     @Override
-    public RpcConfigAuthentications deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException
+    public RpcConfigAuthentications deserialize(final JsonParser p, final DeserializationContext context) throws IOException
     {
         final List<RpcConfigAuthentication<?>> authentications = new ArrayList<>();
 

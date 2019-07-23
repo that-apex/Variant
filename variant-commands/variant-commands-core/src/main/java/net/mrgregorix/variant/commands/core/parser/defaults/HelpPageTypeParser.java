@@ -11,6 +11,7 @@ import net.mrgregorix.variant.commands.api.parser.TypeDefinition;
 import net.mrgregorix.variant.commands.api.parser.TypeParser;
 import net.mrgregorix.variant.commands.api.parser.exception.ParsingException;
 import net.mrgregorix.variant.commands.core.message.HelpPageImpl;
+import net.mrgregorix.variant.utils.annotation.Nullable;
 
 /**
  * A {@link TypeParser} for {@link HelpPage} object
@@ -68,6 +69,7 @@ public class HelpPageTypeParser extends AbstractDefaultTypeParser<HelpPage, Help
     }
 
     @Override
+    @Nullable
     public HelpPage parseType(final ArgumentParser argumentParser, final StringParser parser, final TypeDefinition typeDefinition)
     {
         final String help = parser.readUntil(' ');
@@ -90,7 +92,8 @@ public class HelpPageTypeParser extends AbstractDefaultTypeParser<HelpPage, Help
 
         try
         {
-            return new HelpPageImpl(argumentParser.getParserFor(int.class).parseType(argumentParser, parser, typeDefinition));
+            final Integer page = argumentParser.getParserFor(int.class).parseType(argumentParser, parser, typeDefinition);
+            return page == null ? PAGE_ONE : new HelpPageImpl(page);
         }
         catch (final ParsingException e)
         {

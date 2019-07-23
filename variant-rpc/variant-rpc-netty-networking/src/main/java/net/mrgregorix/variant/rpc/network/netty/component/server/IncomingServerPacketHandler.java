@@ -245,7 +245,7 @@ public class IncomingServerPacketHandler extends ChannelInboundHandlerAdapter
         }
     }
 
-    private void processAuth(final ChannelHandlerContext ctx, final NettyRpcConnectionData data, final Function<RpcAuthenticator, AuthenticationResult> function) throws IOException
+    private void processAuth(final ChannelHandlerContext ctx, final NettyRpcConnectionData data, final Function<? super RpcAuthenticator, ? extends AuthenticationResult> function) throws IOException
     {
         final List<RpcAuthenticator> requiredAuthenticators = data.getRequiredAuthenticators();
 

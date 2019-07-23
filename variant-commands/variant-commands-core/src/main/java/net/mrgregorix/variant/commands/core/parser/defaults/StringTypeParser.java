@@ -32,7 +32,7 @@ public class StringTypeParser extends AbstractDefaultTypeParser<String, StringTy
         {
             final String string = parser.readUntil(' ');
 
-            if (string.equals("_"))
+            if ("_".equals(string))
             {
                 throw new UseDefaultTypeException();
             }
