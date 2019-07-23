@@ -6,6 +6,18 @@
         <Server>
             <Ip>174.125.16.7</Ip>
             <Port>8445</Port>
+
+            <Authentication>
+                <PublicKeyAuthentication publicKey="src/test/resources/test_key.pub" />
+
+                <IpAuthentication>
+                    <Whitelist>
+                        <WhitelistEntry>174.125.16.1</WhitelistEntry>
+                        <WhitelistEntry>174.125.16.2</WhitelistEntry>
+                        <WhitelistEntry>174.125.16.3</WhitelistEntry>
+                    </Whitelist>
+                </IpAuthentication>
+            </Authentication>
         </Server>
     </Group>
 
@@ -16,6 +28,10 @@
             <Ip>174.125.16.7</Ip>
             <Port>8445</Port>
             <Comment>Test comment</Comment>
+
+            <Authentication>
+                <PublicKeyAuthentication publicKey="src/test/resources/test_key.pub" privateKey="src/test/resources/test_key"/>
+            </Authentication>
         </Client>
     </Group>
 </VariantRpc>

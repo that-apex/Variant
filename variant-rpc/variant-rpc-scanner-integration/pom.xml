@@ -24,8 +24,20 @@
             <artifactId>variant-scanner-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.mrgregorix.variant</groupId>
+            <artifactId>variant-rpc-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
         </dependency>
 
         <dependency>
@@ -36,11 +48,6 @@
         <dependency>
             <groupId>net.mrgregorix.variant</groupId>
             <artifactId>variant-inject-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.mrgregorix.variant</groupId>
-            <artifactId>variant-rpc-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

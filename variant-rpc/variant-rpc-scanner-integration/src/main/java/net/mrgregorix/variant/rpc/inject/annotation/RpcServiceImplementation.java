@@ -10,8 +10,7 @@ import net.mrgregorix.variant.scanner.api.Managed;
 
 /**
  * A {@link Managed}-like annotation for a {@link RpcService} implementations.
- * <p>
- * This implementation will be automatically added as exposed to all servers, that have groups matching group specified in {@link #group()}.
+ * <p>  This implementation will be automatically added as exposed to all servers, that have groups matching group specified in {@link #groups()}.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -23,7 +22,7 @@ public @interface RpcServiceImplementation
      *
      * @return group that this implementation should be added to.
      */
-    String group();
+    String[] groups();
 
     /**
      * The type of service that this implementation implements.

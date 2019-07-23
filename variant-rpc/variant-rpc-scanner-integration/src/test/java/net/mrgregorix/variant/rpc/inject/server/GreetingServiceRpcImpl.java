@@ -1,11 +1,10 @@
-package net.mrgregorix.variant.rpc.inject.impl;
+package net.mrgregorix.variant.rpc.inject.server;
 
 import net.mrgregorix.variant.inject.api.annotation.Inject;
-import net.mrgregorix.variant.rpc.inject.GreeterFactory;
-import net.mrgregorix.variant.rpc.inject.GreetingServiceRpc;
+import net.mrgregorix.variant.rpc.inject.client.GreetingServiceRpc;
 import net.mrgregorix.variant.rpc.inject.annotation.RpcServiceImplementation;
 
-@RpcServiceImplementation(group = "greeting", service = GreetingServiceRpc.class)
+@RpcServiceImplementation(groups = "test-server", service = GreetingServiceRpc.class)
 public class GreetingServiceRpcImpl implements GreetingServiceRpc
 {
     private final GreeterFactory greeterFactory;

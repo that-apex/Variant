@@ -9,8 +9,8 @@ public class RpcConfigClient extends RpcConfigComponent
     {
     }
 
-    public RpcConfigClient(final String ip, final int port, final String comment)
+    public RpcConfigClient(final String ip, final int port, final String comment, final RpcConfigAuthentications authentication)
     {
-        super(ip, port, comment);
+        super(ip, port, comment, authentication);
     }
 }

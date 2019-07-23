@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariantRpc>
+    <Group>
+        <Id>test-server</Id>
+
+        <Server>
+            <Ip>127.0.0.1</Ip>
+            <Port>1234</Port>
+
+            <Authentication>
+                <PublicKeyAuthentication publicKey="src/test/resources/test_key.pub"/>
+
+                <IpAuthentication>
+                    <Whitelist>
+                        <WhitelistEntry>127.0.0.1</WhitelistEntry>
+                    </Whitelist>
+                </IpAuthentication>
+            </Authentication>
+        </Server>
+    </Group>
+</VariantRpc>

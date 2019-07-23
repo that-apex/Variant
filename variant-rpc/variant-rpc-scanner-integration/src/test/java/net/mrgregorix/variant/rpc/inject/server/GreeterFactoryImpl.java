@@ -1,6 +1,5 @@
-package net.mrgregorix.variant.rpc.inject.impl;
+package net.mrgregorix.variant.rpc.inject.server;
 
-import net.mrgregorix.variant.rpc.inject.GreeterFactory;
 import net.mrgregorix.variant.scanner.api.Managed;
 
 @Managed

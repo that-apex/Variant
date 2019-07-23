@@ -1,48 +1,60 @@
 package net.mrgregorix.variant.rpc.inject;
 
+import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 import net.mrgregorix.variant.api.Variant;
 import net.mrgregorix.variant.core.builder.VariantBuilder;
 import net.mrgregorix.variant.inject.api.VariantInjector;
 import net.mrgregorix.variant.rpc.api.VariantRpc;
-import net.mrgregorix.variant.rpc.inject.config.RpcConfigClient;
-import net.mrgregorix.variant.rpc.inject.config.RpcConfigGroup;
-import net.mrgregorix.variant.rpc.inject.config.RpcConfigServer;
-import net.mrgregorix.variant.rpc.inject.config.RpcConfiguration;
+import net.mrgregorix.variant.rpc.inject.client.PublicGreeting;
 import net.mrgregorix.variant.rpc.network.netty.NettyRpcNetworkingProvider;
 import net.mrgregorix.variant.scanner.api.VariantScanner;
 import org.junit.jupiter.api.Test;
 
 public class TestIntegration
 {
-    @Test
-    public void testIntegration()
+    private static Variant setupVariant()
     {
         final Variant variant = new VariantBuilder().build();
-        final VariantInjector injector = variant.registerModule(VariantInjector.class);
-        final VariantScanner scanner = variant.registerModule(VariantScanner.class);
-        final VariantRpc rpc = variant.registerModule(VariantRpc.class);
+        variant.registerModule(VariantInjector.class);
+        variant.registerModule(VariantScanner.class);
+        variant.registerModule(VariantRpc.class);
         variant.registerModule(VariantScannerIntegration.class);
 
-        rpc.setNetworkingProvider(new NettyRpcNetworkingProvider());
+        variant.getModule(VariantRpc.class).setNetworkingProvider(new NettyRpcNetworkingProvider());
 
-        final RpcConfiguration configuration = new RpcConfiguration(
-            Collections.singletonList(
-                new RpcConfigGroup("greeting", new RpcConfigServer("127.0.0.1", 3051, ""), new RpcConfigClient("127.0.0.1", 3051, ""))
-            )
-        );
+        return variant;
+    }
 
-        final Collection<Object> objects = scanner.instantiate(TestIntegration.class.getPackageName());
-        new RpcConfigurer(configuration).configure(variant);
+    @Test
+    public void testIntegration() throws IOException
+    {
+        {
+            // setup server
+            final Variant variant = setupVariant();
 
-        objects
-            .stream()
-            .filter(it -> it instanceof PublicGreeting)
-            .findAny()
-            .map(it -> (PublicGreeting) it)
-            .orElseThrow()
-            .greet("John");
+            variant.getModule(VariantScanner.class).instantiate(TestIntegration.class.getPackageName() + ".server");
+
+            new RpcConfigurer(TestIntegration.class.getResourceAsStream("/ServerConfig.xml")).configure(variant);
+        }
+
+        {
+            // setup client
+            final Variant variant = setupVariant();
+
+            final Collection<Object> objects = variant.getModule(VariantScanner.class).instantiate(TestIntegration.class.getPackageName() + ".client");
+
+            new RpcConfigurer(TestIntegration.class.getResourceAsStream("/ClientConfig.xml")).configure(variant);
+
+            // test
+            objects
+                .stream()
+                .filter(it -> it instanceof PublicGreeting)
+                .findAny()
+                .map(it -> (PublicGreeting) it)
+                .orElseThrow()
+                .greet("John");
+        }
     }
 }

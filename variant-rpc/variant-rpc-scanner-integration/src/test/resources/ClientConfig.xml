@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariantRpc>
+    <Group>
+        <Id>test-client</Id>
+
+        <Client>
+            <Ip>127.0.0.1</Ip>
+            <Port>1234</Port>
+            <Comment>Test comment</Comment>
+
+            <Authentication>
+                <PublicKeyAuthentication privateKey="src/test/resources/test_key">
+
+                </PublicKeyAuthentication>
+            </Authentication>
+        </Client>
+    </Group>
+</VariantRpc>

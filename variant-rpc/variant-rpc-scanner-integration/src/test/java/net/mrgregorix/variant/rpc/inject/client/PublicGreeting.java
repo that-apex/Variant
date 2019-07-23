@@ -1,4 +1,4 @@
-package net.mrgregorix.variant.rpc.inject;
+package net.mrgregorix.variant.rpc.inject.client;
 
 public interface PublicGreeting
 {
