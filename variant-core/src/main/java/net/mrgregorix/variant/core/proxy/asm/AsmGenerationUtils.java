@@ -6,8 +6,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import net.mrgregorix.variant.utils.reflect.PrimitiveUtils;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -17,21 +16,6 @@ import org.objectweb.asm.Type;
  */
 public class AsmGenerationUtils
 {
-    private static final BiMap<Class<?>, Class<?>> PRIMITIVE_WRAPPER_TYPES = HashBiMap.create(9);
-
-    static
-    {
-        PRIMITIVE_WRAPPER_TYPES.put(boolean.class, Boolean.class);
-        PRIMITIVE_WRAPPER_TYPES.put(byte.class, Byte.class);
-        PRIMITIVE_WRAPPER_TYPES.put(char.class, Character.class);
-        PRIMITIVE_WRAPPER_TYPES.put(double.class, Double.class);
-        PRIMITIVE_WRAPPER_TYPES.put(float.class, Float.class);
-        PRIMITIVE_WRAPPER_TYPES.put(int.class, Integer.class);
-        PRIMITIVE_WRAPPER_TYPES.put(long.class, Long.class);
-        PRIMITIVE_WRAPPER_TYPES.put(short.class, Short.class);
-        PRIMITIVE_WRAPPER_TYPES.put(void.class, Void.class);
-    }
-
     /**
      * Change a java class name to a bytecode name
      *
@@ -217,7 +201,7 @@ public class AsmGenerationUtils
             return;
         }
 
-        final String wrapperType = javaNameToAsmName(PRIMITIVE_WRAPPER_TYPES.get(type).getName());
+        final String wrapperType = javaNameToAsmName(PrimitiveUtils.primitiveToWrapper(type).getName());
         mv.visitTypeInsn(Opcodes.CHECKCAST, wrapperType);
         mv.visitMethodInsn(
             Opcodes.INVOKEVIRTUAL,
@@ -241,7 +225,7 @@ public class AsmGenerationUtils
             return;
         }
 
-        final String wrapperType = javaNameToAsmName(PRIMITIVE_WRAPPER_TYPES.get(type).getName());
+        final String wrapperType = javaNameToAsmName(PrimitiveUtils.primitiveToWrapper(type).getName());
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
             wrapperType,

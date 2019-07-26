@@ -29,9 +29,9 @@ public class PrimitiveUtils
         return Objects.requireNonNull(WRAPPERS_TO_PRIMITIVES.get(wrapper));
     }
 
-    public static Class<?> primitiveToWrapper(final Class<?> wrapper)
+    public static Class<?> primitiveToWrapper(final Class<?> primitive)
     {
-        return Objects.requireNonNull(WRAPPERS_TO_PRIMITIVES.inverse().get(wrapper));
+        return Objects.requireNonNull(WRAPPERS_TO_PRIMITIVES.inverse().get(primitive));
     }
 
     public static Class<?> getById(final int id)
